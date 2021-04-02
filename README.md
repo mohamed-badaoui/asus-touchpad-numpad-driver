@@ -3,7 +3,7 @@
 This is a python service which enables switching between numpad and touchpad for the Asus UX433.
 It may work for other models.
 
-Before installation, you need to check/modify th ic2 adapter number in ux433_touchpad_numpad.py file
+Before installation, you need to check/modify the ic2 adapter number in ux433_touchpad_numpad.py file
 ```
 sudo aptitude install i2c-tools
 sudo i2cdetect -l
