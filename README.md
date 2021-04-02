@@ -19,6 +19,6 @@ Then, you need to install the python libevdev package, run install.sh and reboot
 
 ```
 sudo pip3 install libevdev
-sudo modprobe i2c-dev
+sudo sh install.sh
 ```
 To turn on/off numpad, tap F8 key. 
