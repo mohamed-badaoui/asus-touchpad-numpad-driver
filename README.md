@@ -28,6 +28,6 @@ Then, you need to install the python libevdev package, run install.sh and reboot
 sudo pip3 install libevdev
 sudo sh install.sh
 ```
-To turn on/off numpad, tap top right toupchpad area or F8 key. 
+To turn on/off numpad, tap top right touchpad area or F8 key. 
 
 It is an adaptation of a solution published on reddit (https://www.reddit.com/r/linuxhardware/comments/f2vdad/a_service_handling_touchpad_numpad_switching_for/) and the users' contributions  on launchpad (https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1810183)
