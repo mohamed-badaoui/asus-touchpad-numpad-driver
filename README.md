@@ -8,6 +8,7 @@ It may work for other models.
 Before installation, you need to check/modify the ic2 adapter number in ux433_touchpad_numpad.py file
 ```
 sudo aptitude install i2c-tools
+sudo modprobe i2c-dev
 sudo i2cdetect -l
 ```
 The rigth one, is one with label "I2C adapter"
