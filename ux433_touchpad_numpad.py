@@ -82,7 +82,7 @@ dev.enable(EV_KEY.KEY_KP3)
 dev.enable(EV_KEY.KEY_KP4)
 dev.enable(EV_KEY.KEY_KP5)
 dev.enable(EV_KEY.KEY_KP6)
-dev.enable(EV_KEY.KEY_7)
+dev.enable(EV_KEY.KEY_KP7)
 dev.enable(EV_KEY.KEY_KP8)
 dev.enable(EV_KEY.KEY_KP9)
 dev.enable(EV_KEY.KEY_KP0)
@@ -94,6 +94,7 @@ dev.enable(EV_KEY.KEY_KPPLUS)
 dev.enable(EV_KEY.KEY_KPCOMMA)
 dev.enable(EV_KEY.KEY_KPENTER)
 dev.enable(EV_KEY.KEY_LEFTSHIFT)
+dev.enable(EV_KEY.KEY_APOSTROPHE)
 
 udev = dev.create_uinput_device()
 
@@ -117,10 +118,38 @@ while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
 
-        # If touchpad mode, ignore #
+        # # if not numlock:
+        # Get x position #
+        if e.matches(EV_ABS.ABS_MT_POSITION_X):
+            x = e.value
+        # Get y position #
+        if e.matches(EV_ABS.ABS_MT_POSITION_Y):
+            y = e.value
+
+        if e.matches(EV_KEY.BTN_TOOL_FINGER) and e.value == 0:
+            # Check if numlock was hit  #
+            if (x > 0.9 * maxx) and (y < 0.1 * maxy):
+                finger=0
+                if not numlock:
+                    numlock = True
+                    d_t.grab()
+                    subprocess.call(onCmd, shell=True)
+                else:
+                    events = [
+                        InputEvent(EV_KEY.KEY_LEFTSHIFT, 0),
+                        InputEvent(value, 0),
+                        InputEvent(EV_SYN.SYN_REPORT, 0)
+                    ]
+                    udev.send_events(events)
+                    numlock = False
+                    d_t.ungrab()
+                    subprocess.call(offCmd, shell=True)
+                continue
+
+        # If touchpad mode, ignore #        
         if not numlock:
             continue
-        
+
         # Get x position #
         if e.matches(EV_ABS.ABS_MT_POSITION_X) and finger == 0:
             x = e.value
@@ -154,12 +183,11 @@ while True:
             finger = 2
 
             try:
-                events = []
                 # first row
                 if y < 0.25 * maxy:
                     # nums colums
                     if x < 0.2 * maxx:
-                        value = EV_KEY.KEY_7
+                        value = EV_KEY.KEY_KP7
                     elif x < 0.4 * maxx:
                         value = EV_KEY.KEY_KP8
                     elif x < 0.6 * maxx:
@@ -204,9 +232,11 @@ while True:
                         value = EV_KEY.KEY_KPENTER
 
                 # Send press key event #
-                events.append(InputEvent(EV_KEY.KEY_LEFTSHIFT, 1))
-                events.append(InputEvent(value, 1))
-                events.append(InputEvent(EV_SYN.SYN_REPORT, 0))
+                events = [
+                    InputEvent(EV_KEY.KEY_LEFTSHIFT, 1),
+                    InputEvent(value, 1),
+                    InputEvent(EV_SYN.SYN_REPORT, 0)
+                ]
                 udev.send_events(events)
             except OSError as e:
                 pass
