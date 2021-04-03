@@ -95,6 +95,7 @@ dev.enable(EV_KEY.KEY_KPCOMMA)
 dev.enable(EV_KEY.KEY_KPENTER)
 dev.enable(EV_KEY.KEY_LEFTSHIFT)
 dev.enable(EV_KEY.KEY_APOSTROPHE)
+dev.enable(EV_KEY.KEY_NUMLOCK)
 
 udev = dev.create_uinput_device()
 
@@ -118,35 +119,28 @@ while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
 
-        # # if not numlock:
-        # Get x position #
-        if e.matches(EV_ABS.ABS_MT_POSITION_X):
-            x = e.value
-        # Get y position #
-        if e.matches(EV_ABS.ABS_MT_POSITION_Y):
-            y = e.value
+        # # Get x position #
+        # if e.matches(EV_ABS.ABS_MT_POSITION_X):
+        #     x = e.value
+        # # Get y position #
+        # if e.matches(EV_ABS.ABS_MT_POSITION_Y):
+        #     y = e.value
 
-        if e.matches(EV_KEY.BTN_TOOL_FINGER) and e.value == 0:
-            # Check if numlock was hit  #
-            if (x > 0.9 * maxx) and (y < 0.1 * maxy):
-                finger=0
-                if not numlock:
-                    numlock = True
-                    d_t.grab()
-                    subprocess.call(onCmd, shell=True)
-                else:
-                    events = [
-                        InputEvent(EV_KEY.KEY_LEFTSHIFT, 0),
-                        InputEvent(value, 0),
-                        InputEvent(EV_SYN.SYN_REPORT, 0)
-                    ]
-                    udev.send_events(events)
-                    numlock = False
-                    d_t.ungrab()
-                    subprocess.call(offCmd, shell=True)
-                continue
+        # if e.matches(EV_KEY.BTN_TOOL_FINGER) and e.value == 0:
+        #     # Check if numlock was hit  #
+        #     if (x > 0.9 * maxx) and (y < 0.1 * maxy):
+        #         finger=0
+        #         if not numlock:
+        #             numlock = True
+        #             d_t.grab()
+        #             subprocess.call(onCmd, shell=True)
+        #         else:
+        #             numlock = False
+        #             d_t.ungrab()
+        #             subprocess.call(offCmd, shell=True)
+        #         continue
 
-        # If touchpad mode, ignore #        
+        # If touchpad mode, ignore #
         if not numlock:
             continue
 
@@ -165,7 +159,7 @@ while True:
                 finger = 0
                 try:
                     events = [
-                        InputEvent(EV_KEY.KEY_LEFTSHIFT, 0),
+                        InputEvent(EV_KEY.KEY_NUMLOCK, 0),
                         InputEvent(value, 0),
                         InputEvent(EV_SYN.SYN_REPORT, 0)
                     ]
@@ -233,7 +227,7 @@ while True:
 
                 # Send press key event #
                 events = [
-                    InputEvent(EV_KEY.KEY_LEFTSHIFT, 1),
+                    InputEvent(EV_KEY.KEY_NUMLOCK, 1),
                     InputEvent(value, 1),
                     InputEvent(EV_SYN.SYN_REPORT, 0)
                 ]
