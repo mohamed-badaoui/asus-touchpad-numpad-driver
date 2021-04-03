@@ -27,3 +27,7 @@ sudo sh install.sh
 To turn on/off numpad, tap F8 key. 
 
 It is an adaptation of a solution published on reddit (https://www.reddit.com/r/linuxhardware/comments/f2vdad/a_service_handling_touchpad_numpad_switching_for/) and the users' contributions  on launchpad (https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1810183)
+
+The contributor magellan has worked on this solution for the M433IA asus model, do not hesitate to contact him for further informations.
+(https://github.com/magellan-13016)
+
