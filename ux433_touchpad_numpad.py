@@ -119,26 +119,26 @@ while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
 
-        # # Get x position #
-        # if e.matches(EV_ABS.ABS_MT_POSITION_X):
-        #     x = e.value
-        # # Get y position #
-        # if e.matches(EV_ABS.ABS_MT_POSITION_Y):
-        #     y = e.value
+        # Get x position #
+        if e.matches(EV_ABS.ABS_MT_POSITION_X):
+            x = e.value
+        # Get y position #
+        if e.matches(EV_ABS.ABS_MT_POSITION_Y):
+            y = e.value
 
-        # if e.matches(EV_KEY.BTN_TOOL_FINGER) and e.value == 0:
-        #     # Check if numlock was hit  #
-        #     if (x > 0.9 * maxx) and (y < 0.1 * maxy):
-        #         finger=0
-        #         if not numlock:
-        #             numlock = True
-        #             d_t.grab()
-        #             subprocess.call(onCmd, shell=True)
-        #         else:
-        #             numlock = False
-        #             d_t.ungrab()
-        #             subprocess.call(offCmd, shell=True)
-        #         continue
+        if e.matches(EV_KEY.BTN_TOOL_FINGER) and e.value == 0:
+            # Check if numlock was hit  #
+            if (x > 0.95 * maxx) and (y < 0.05 * maxy):
+                finger=0
+                if not numlock:
+                    numlock = True
+                    d_t.grab()
+                    subprocess.call(onCmd, shell=True)
+                else:
+                    numlock = False
+                    d_t.ungrab()
+                    subprocess.call(offCmd, shell=True)
+                continue
 
         # If touchpad mode, ignore #
         if not numlock:
@@ -174,12 +174,14 @@ while True:
 
         # During tap #
         if finger == 1:
-            finger = 2
+            # Ignore numpad touch
+            if (x > 0.95 * maxx) and (y < 0.05 * maxy):
+                continue            
 
+            finger = 2
             try:
                 # first row
                 if y < 0.25 * maxy:
-                    # nums colums
                     if x < 0.2 * maxx:
                         value = EV_KEY.KEY_KP7
                     elif x < 0.4 * maxx:
