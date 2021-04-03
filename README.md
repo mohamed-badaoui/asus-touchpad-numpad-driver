@@ -35,6 +35,6 @@ It is an adaptation of a solution published on reddit (https://www.reddit.com/r/
 For any question, please do not hesitate to follow this tread discussion
 (https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1810183)
 
-Many contributors could help you to adapt this to your laptop as a workaround for the moement.
+Many contributors could help you to adapt this to your laptop as a workaround for the moment.
 The contributor magellan-2000 has worked on a solution for the M433IA asus model, do not hesitate to contact him for further informations.
 
