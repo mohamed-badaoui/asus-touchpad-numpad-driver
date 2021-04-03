@@ -1,4 +1,4 @@
-# M433IA touchpad numpad
+# M433IA touchpad numpad ( AZERTY keyboard )
 
 ![alt text](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/asus-m433ia-numpad-driver/Asus-VivoBook-M433IA.jpg)
 
