@@ -59,18 +59,18 @@ do
 done
 
 echo
-echo "What is your Asus model like?"
+echo "What is your Numpad layout model like?"
 PS3='Please enter your choice: '
-options=("Numpad without % and = symbols (UX433, UX431F ..)" "Numpad with % and = symbols (M433IA, ..)" "Quit")
+options=("Numpad without % and = symbols" "Numpad with % and = symbols" "Quit")
 select opt in "${options[@]}"
 do
     case $opt in
-        "Numpad without % and = symbols (UX433, UX431F ..)")
+        "Numpad without % and = symbols")
         echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
             cat touchpad_numpad_ux433.py | sed -r "s/-y ([0-9]+)/-y $number/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
             break
             ;;
-        "Numpad with % and = symbols (M433IA, ..)")
+        "Numpad with % and = symbols")
             echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
             if [ "$is_qwerty" = true ] ; then
                 cat touchpad_numpad_m433ia.py | sed -r "s/-y ([0-9]+)/-y $number/" | sed -r "s/KEY_APOSTROPHE/KEY_5/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
