@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# -------------------------------------------------------
+# A shell script that install python driver for Asus numpad 
+# MIT LICENSE file
+# Written by: Badaoui Mohamed 
+# Last updated on: 2021/04/04
+# -------------------------------------------------------
+
 sudo modprobe i2c-dev
 interfaces=$(for i in $(sudo i2cdetect -l | grep DesignWare | sed -r "s/^(i2c\-[0-9]+).*/\1/"); do echo $i; done)
 if [ -z "$interfaces" ]
