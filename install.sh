@@ -35,6 +35,30 @@ if [ "$touchpad_detected" = false ] ; then
     exit 0
 fi
 
+is_qwerty=false;
+
+echo "What is your keyboard layout?"
+PS3='Please enter your choice: '
+options=("Qwerty" "Azerty" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Qwerty")
+        is_qwerty=true
+            break
+            ;;
+        "Azerty")
+        is_qwerty=false
+            break
+            ;;
+        "Quit")
+            exit 0
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
+echo
 echo "What is your Asus model like?"
 PS3='Please enter your choice: '
 options=("Numpad without % and = symbols (UX433, UX431F ..)" "Numpad with % and = symbols (M433IA, ..)" "Quit")
@@ -48,7 +72,11 @@ do
             ;;
         "Numpad with % and = symbols (M433IA, ..)")
             echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
-            cat touchpad_numpad_m433ia.py | sed -r "s/-y ([0-9]+)/-y $number/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
+            if [ "$is_qwerty" = true ] ; then
+                cat touchpad_numpad_m433ia.py | sed -r "s/-y ([0-9]+)/-y $number/" | sed -r "s/KEY_APOSTROPHE/KEY_5/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
+            else
+                cat touchpad_numpad_m433ia.py | sed -r "s/-y ([0-9]+)/-y $number/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
+            fi
             break
             ;;
         "Quit")
@@ -57,6 +85,8 @@ do
         *) echo "invalid option $REPLY";;
     esac
 done
+
+
 
 echo "Add asus touchpad service in /lib/systemd/system/"
 sudo cp ./asus_touchpad_numpad.service /lib/systemd/system/
