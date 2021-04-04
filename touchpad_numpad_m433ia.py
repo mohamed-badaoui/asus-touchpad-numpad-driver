@@ -22,7 +22,7 @@ while tries > 0:
         lines = f.readlines()
         for line in lines:
             # Look for the touchpad #
-            if touchpad_detected == 0 and "Name=\"ASUE140" in line and "Mouse" not in line:
+            if touchpad_detected == 0 and "Name=\"ASUE140" in line and "Touchpad" in line:
                 touchpad_detected = 1
     
             if touchpad_detected == 1:
