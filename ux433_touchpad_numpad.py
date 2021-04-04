@@ -134,36 +134,22 @@ while True:
 
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
+        # ignore others events, except position and finger events 
+        if not (
+            e.matches(EV_ABS.ABS_MT_POSITION_X) or 
+            e.matches(EV_ABS.ABS_MT_POSITION_Y) or 
+            e.matches(EV_KEY.BTN_TOOL_FINGER)
+        ):
+            continue
 
         # Get x position #
         if e.matches(EV_ABS.ABS_MT_POSITION_X):
             x = e.value
+            continue
         # Get y position #
         if e.matches(EV_ABS.ABS_MT_POSITION_Y):
             y = e.value
-
-        if e.matches(EV_KEY.BTN_TOOL_FINGER) and e.value == 0:
-            # Check if numlock was hit  #
-            if (x > 0.95 * maxx) and (y < 0.05 * maxy):
-                finger=0
-                numlock = not numlock
-                if numlock:
-                    activate_numlock()
-                else:
-                    deactivate_numlock()
-                continue
-
-        # If touchpad mode, ignore #
-        if not numlock:
             continue
-
-        # Get x position #
-        if e.matches(EV_ABS.ABS_MT_POSITION_X) and finger == 0:
-            x = e.value
-        
-        # Get y position #
-        if e.matches(EV_ABS.ABS_MT_POSITION_Y) and finger == 0:
-            y = e.value
 
         # If tap #
         if e.matches(EV_KEY.BTN_TOOL_FINGER):
@@ -171,11 +157,13 @@ while True:
             if e.value == 0:
                 finger = 0
                 try:
-                    events = [
-                        InputEvent(value, 0),
-                        InputEvent(EV_SYN.SYN_REPORT, 0)
-                    ]
-                    udev.send_events(events)
+                    if value:
+                        events = [
+                            InputEvent(value, 0),
+                            InputEvent(EV_SYN.SYN_REPORT, 0)
+                        ]
+                        udev.send_events(events)
+                        value = None
                     pass
                 except OSError as e:
                     pass
@@ -184,12 +172,25 @@ while True:
             if finger == 0 and e.value == 1:
                 finger = 1
 
+        # Check if numlock was hit #
+        if (
+            e.matches(EV_KEY.BTN_TOOL_FINGER) and 
+            e.value == 1 and 
+            (x > 0.95 * maxx) and (y < 0.05 * maxy)
+        ):
+            finger=0
+            numlock = not numlock
+            if numlock:
+                activate_numlock()
+            else:
+                deactivate_numlock()
+
+        # If touchpad mode, ignore #
+        if not numlock:
+            continue
+
         # During tap #
         if finger == 1:
-            # Ignore numpad touch
-            if (x > 0.95 * maxx) and (y < 0.05 * maxy):
-                continue            
-
             finger = 2
             try:
                 # first row
