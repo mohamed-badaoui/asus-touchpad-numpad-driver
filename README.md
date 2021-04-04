@@ -17,6 +17,7 @@ You need to install the python libevdev package, run install.sh and reboot (or s
 
 ```
 sudo pip3 install libevdev
+sudo chmod +x ./install.sh
 sudo ./install.sh
 ```
 To turn on/off numpad, tap top right corner touchpad area or F8 key.
