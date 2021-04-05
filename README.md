@@ -1,6 +1,8 @@
 # UX433 touchpad numpad
 
-![alt text](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-ZenBook-UX433FA.jpg)
+Without % = symbols             |  With % = symbols
+:-------------------------:|:-------------------------:
+![without % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-ZenBook-UX433FA.jpg)  |  ![with % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-VivoBook-M433IA.jpg)
 
 This is a python service which enables switching between numpad and touchpad for the Asus UX433.
 It may work for other models.
