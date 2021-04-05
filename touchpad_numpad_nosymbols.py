@@ -145,7 +145,7 @@ while True:
 
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
-        # ignore others events, except position and finger events 
+        # ignore others events, except position and finger events
         if not (
             e.matches(EV_ABS.ABS_MT_POSITION_X) or 
             e.matches(EV_ABS.ABS_MT_POSITION_Y) or 

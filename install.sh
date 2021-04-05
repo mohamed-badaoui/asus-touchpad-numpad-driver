@@ -35,57 +35,46 @@ if [ "$touchpad_detected" = false ] ; then
     exit 0
 fi
 
-is_qwerty=false;
-
-echo "What is your keyboard layout?"
-PS3='Please enter your choice: '
-options=("Qwerty" "Azerty" "Quit")
-select opt in "${options[@]}"
-do
-    case $opt in
-        "Qwerty")
-        is_qwerty=true
-            break
-            ;;
-        "Azerty")
-        is_qwerty=false
-            break
-            ;;
-        "Quit")
-            exit 0
-            ;;
-        *) echo "invalid option $REPLY";;
-    esac
-done
+has_symbols=false;
+read -p "Does your numpad has % and = symbols [N/y]" -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    echo "Your numpad has % and = symbols."
+    has_symbols=true
+else
+    echo "Your numpad has no extra symbols."
+fi
 
 echo
-echo "What is your Numpad layout model like?"
-PS3='Please enter your choice: '
-options=("Numpad without % and = symbols" "Numpad with % and = symbols" "Quit")
-select opt in "${options[@]}"
-do
-    case $opt in
-        "Numpad without % and = symbols")
-        echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
-            cp touchpad_numpad_ux433.py /usr/bin/asus_touchpad_numpad.py
-            break
-            ;;
-        "Numpad with % and = symbols")
-            echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
-            if [ "$is_qwerty" = true ] ; then
-                cat touchpad_numpad_m433ia.py | sed -r "s/KEY_APOSTROPHE/KEY_5/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
-            else
-                cp touchpad_numpad_m433ia.py /usr/bin/asus_touchpad_numpad.py
-            fi
-            break
-            ;;
-        "Quit")
-            exit 0
-            ;;
-        *) echo "invalid option $REPLY";;
-    esac
-done
 
+if [ "$has_symbols" = true ] ; then
+    echo "What is your keyboard layout?"
+    PS3='Please enter your choice [1-3]: '
+    options=("Qwerty" "Azerty" "Quit")
+    select opt in "${options[@]}"
+    do
+        case $opt in
+            "Qwerty")
+                echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
+                cat touchpad_numpad_symbols.py | sed -r "s/KEY_APOSTROPHE/KEY_5/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
+                break
+                ;;
+            "Azerty")
+                echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
+                cp touchpad_numpad_symbols.py /usr/bin/asus_touchpad_numpad.py
+                break
+                ;;
+            "Quit")
+                exit 0
+                ;;
+            *) echo "invalid option $REPLY";;
+        esac
+    done
+else
+    echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
+    cp touchpad_numpad_nosymbols.py /usr/bin/asus_touchpad_numpad.py
+fi
 
 
 echo "Add asus touchpad service in /lib/systemd/system/"
@@ -94,5 +83,5 @@ echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c-dev.conf >/dev/null
 
 sudo systemctl enable asus_touchpad_numpad
 echo "Asus touchpad service enabled"
-sudo systemctl start asus_touchpad_numpad
+sudo systemctl restart asus_touchpad_numpad
 echo "Asus touchpad service started"
