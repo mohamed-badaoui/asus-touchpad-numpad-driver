@@ -67,15 +67,15 @@ do
     case $opt in
         "Numpad without % and = symbols")
         echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
-            cat touchpad_numpad_ux433.py | sed -r "s/-y ([0-9]+)/-y $number/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
+            cp touchpad_numpad_ux433.py /usr/bin/asus_touchpad_numpad.py
             break
             ;;
         "Numpad with % and = symbols")
             echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
             if [ "$is_qwerty" = true ] ; then
-                cat touchpad_numpad_m433ia.py | sed -r "s/-y ([0-9]+)/-y $number/" | sed -r "s/KEY_APOSTROPHE/KEY_5/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
+                cat touchpad_numpad_m433ia.py | sed -r "s/KEY_APOSTROPHE/KEY_5/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
             else
-                cat touchpad_numpad_m433ia.py | sed -r "s/-y ([0-9]+)/-y $number/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
+                cp touchpad_numpad_m433ia.py /usr/bin/asus_touchpad_numpad.py
             fi
             break
             ;;
@@ -90,7 +90,7 @@ done
 
 echo "Add asus touchpad service in /lib/systemd/system/"
 sudo cp ./asus_touchpad_numpad.service /lib/systemd/system/
-echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c-dev.conf
+echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c-dev.conf >/dev/null
 
 sudo systemctl enable asus_touchpad_numpad
 echo "Asus touchpad service enabled"

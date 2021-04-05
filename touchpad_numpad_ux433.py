@@ -1,14 +1,13 @@
+import re
 import subprocess
 import sys
 from fcntl import F_SETFL, fcntl
 from os import O_NONBLOCK
+from subprocess import PIPE, Popen
 from time import sleep
 
 from libevdev import EV_ABS, EV_KEY, EV_LED, EV_SYN, Device, InputEvent
 
-onCmd = "i2ctransfer -f -y 2 w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x01 0xad"
-offCmd = "i2ctransfer -f -y 2 w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
-numlock=False
 tries=5
 
 # Look into the devices file #
@@ -26,6 +25,10 @@ while tries > 0:
                 touchpad_detected = 1
     
             if touchpad_detected == 1:
+                if "S: " in line:
+                    # search device id 
+                    device_id=re.sub(r".*i2c-([^/])/.*$", r'\1', line)
+
                 if "H: " in line:
                     touchpad = line.split("event")[1]
                     touchpad = touchpad.split(" ")[0]
@@ -51,13 +54,16 @@ while tries > 0:
             if keyboard_detected != 2:
                 print("Can't find keyboard, code " + str(keyboard_detected))
             if touchpad_detected != 2:
-                print("Can't find touchpad, code " + str(touchpad_detected))                    
+                print("Can't find touchpad, code " + str(touchpad_detected))
+            if touchpad_detected == 2 and isinstance(device_id, int):
+                print("Can't find device id")
             sys.exit(1)
     else:
         break
 
     sleep(0.1)
 
+device_id=device_id.replace("\n", "")
 
 # Start monitoring the touchpad #
 fd_t = open('/dev/input/event' + str(touchpad), 'rb')
@@ -104,6 +110,9 @@ udev = dev.create_uinput_device()
 finger = 0
 value = 0
 
+onCmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x01 0xad"
+offCmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+
 def activate_numlock():
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
@@ -121,6 +130,8 @@ def deactivate_numlock():
     udev.send_events(events)
     d_t.ungrab()
     subprocess.call(offCmd, shell=True)
+
+numlock=False
 
 # Process events while running #
 while True:
