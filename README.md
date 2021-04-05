@@ -8,6 +8,7 @@ It may work for other models.
 Install required packages
 
 ```
+sudo aptitude install libevdev2
 sudo aptitude install i2c-tools
 sudo modprobe i2c-dev
 sudo i2cdetect -l
