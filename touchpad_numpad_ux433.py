@@ -27,7 +27,7 @@ while tries > 0:
             if touchpad_detected == 1:
                 if "S: " in line:
                     # search device id 
-                    device_id=re.sub(r".*i2c-([^/])/.*$", r'\1', line)
+                    device_id=re.sub(r".*i2c-([^/])/.*$", r'\1', line).replace("\n", "")
 
                 if "H: " in line:
                     touchpad = line.split("event")[1]
@@ -55,15 +55,13 @@ while tries > 0:
                 print("Can't find keyboard, code " + str(keyboard_detected))
             if touchpad_detected != 2:
                 print("Can't find touchpad, code " + str(touchpad_detected))
-            if touchpad_detected == 2 and isinstance(device_id, int):
+            if touchpad_detected == 2 and not device_id.isnumeric():
                 print("Can't find device id")
             sys.exit(1)
     else:
         break
 
     sleep(0.1)
-
-device_id=device_id.replace("\n", "")
 
 # Start monitoring the touchpad #
 fd_t = open('/dev/input/event' + str(touchpad), 'rb')
