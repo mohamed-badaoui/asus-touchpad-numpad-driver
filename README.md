@@ -12,6 +12,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UX434FA (with % and = symbols)
 - UX363EA (with % and = symbols)
 - M433IA (with % and = symbols)
+- TM420 (with % and = symbols)
 
 Install required packages
 
