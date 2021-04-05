@@ -11,7 +11,7 @@ sudo modprobe i2c-dev
 interfaces=$(for i in $(sudo i2cdetect -l | grep DesignWare | sed -r "s/^(i2c\-[0-9]+).*/\1/"); do echo $i; done)
 if [ -z "$interfaces" ]
 then
-    echo "No interface s2c found. Make sure you have installed libevdev packages"
+    echo "No interface i2c found. Make sure you have installed libevdev packages"
     exit 0
 fi
 
