@@ -13,7 +13,9 @@ This python driver has been tested and works fine for these asus versions at the
 - UX431F (without extra symbols)
 - UX333FA (without extra symbols)
 - UX434FA (with % and = symbols)
+- UX325EA (with % and = symbols)
 - UX363EA (with % and = symbols)
+- UX393 (with % and = symbols)
 - M433IA (with % and = symbols)
 - TM420 (with % and = symbols)
 
