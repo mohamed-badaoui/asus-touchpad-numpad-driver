@@ -8,16 +8,17 @@ This is a python service which enables switching between numpad and touchpad for
 It may work for other models.
 
 This python driver has been tested and works fine for these asus versions at the moment:
-- X412DA (without extra symbols)
-- UX433 (without extra symbols)
-- UX431F (without extra symbols)
-- UX333FA (without extra symbols)
-- UX434FA (with % and = symbols)
-- UX325EA (with % and = symbols)
-- UX363EA (with % and = symbols)
-- UX393 (with % and = symbols)
 - M433IA (with % and = symbols)
 - TM420 (with % and = symbols)
+- UX434FA (with % and = symbols)
+- UX433 (without extra symbols)
+- UX431F (without extra symbols)
+- UX412DA (without extra symbols)
+- UX393 (with % and = symbols)
+- UX371E (With % and = symbols)
+- UX363EA (with % and = symbols)
+- UX333FA (without extra symbols)
+- UX325EA (with % and = symbols)
 
 Install required packages
 
