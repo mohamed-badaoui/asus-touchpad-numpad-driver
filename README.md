@@ -10,6 +10,7 @@ It may work for other models.
 This python driver has been tested and works fine for these asus versions at the moment:
 - M433IA (with % and = symbols)
 - TM420 (with % and = symbols)
+- UX425EA (with % and = symbols)
 - UX434FA (with % and = symbols)
 - UX433 (without extra symbols)
 - UX431F (without extra symbols)
