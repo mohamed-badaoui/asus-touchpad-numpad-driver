@@ -1,4 +1,4 @@
-# UX433 touchpad numpad
+# Asus touchpad numpad driver
 
 Without % = symbols             |  With % = symbols
 :-------------------------:|:-------------------------:
