@@ -8,6 +8,7 @@ Type=simple
 ExecStart=/usr/bin/python3 /usr/bin/asus_touchpad_numpad.py
 StandardInput=tty-force
 TimeoutSec=5
+ExecStartPre=/bin/sleep 1
 
 [Install]
 WantedBy=default.target
