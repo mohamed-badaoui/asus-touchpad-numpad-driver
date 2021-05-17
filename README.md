@@ -25,19 +25,35 @@ This python driver has been tested and works fine for these asus versions at the
 
 Install required packages
 
+- Debian / Ubuntu / Linux Mint / Pop!_OS / Zorin OS:
 ```
-sudo aptitude install libevdev2 i2c-tools
+sudo apt install libevdev2 python3-libevdev i2c-tools git
+```
+
+- Arch Linux / Manjaro:
+```
+sudo pacman -S libevdev python-libevdev i2c-tools git
+```
+
+- Fedora:
+```
+sudo dnf install libevdev python-libevdev i2c-tools git
+```
+
+Then enabble i2c
+```
 sudo modprobe i2c-dev
 sudo i2cdetect -l
 ```
 
-You need to install the python libevdev package, run install.sh and reboot (or start the service).
-
+Now you can get the latest ASUS Touchpad Numpad Driver for Linux from Git and install it using the following commands.
 ```
-sudo pip3 install libevdev
-sudo chmod +x ./install.sh
+git clone https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver
+cd asus-touchpad-numpad-driver
+chmod +x ./install.sh
 sudo ./install.sh
 ```
+
 To turn on/off numpad, tap top right corner touchpad area or F8 key.
 
 It is an adaptation made thanks to:
