@@ -9,6 +9,7 @@ It may work for other models.
 
 This python driver has been tested and works fine for these asus versions at the moment:
 - M433IA (with % and = symbols)
+- R424DA (without extra symbols)
 - TM420 (with % and = symbols)
 - UM433DA (with % and = symbols)
 - UX425EA (with % and = symbols)
@@ -23,7 +24,6 @@ This python driver has been tested and works fine for these asus versions at the
 - UX333FA (without extra symbols)
 - UX325EA (with % and = symbols)
 - X412DA (without extra symbols)
-- R424DA (without extra symbols)
 
 Install required packages
 
