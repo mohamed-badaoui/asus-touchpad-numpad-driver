@@ -3,23 +3,39 @@
 # -------------------------------------------------------
 # A shell script that install python driver for Asus numpad 
 # MIT LICENSE file
-# Written by: Badaoui Mohamed 
-# Last updated on: 2021/04/04
+# Written by: Badaoui Mohamed and Gregoire-perso
+# Last updated on: 2021/06/10
 # -------------------------------------------------------
 
-sudo modprobe i2c-dev
-interfaces=$(for i in $(sudo i2cdetect -l | grep DesignWare | sed -r "s/^(i2c\-[0-9]+).*/\1/"); do echo $i; done)
+# Checking if the script is runned as root (via sudo or other)
+if [[ $(id -u) != 0 ]]
+then
+	echo "Please run the installation script as root (using sudo for example)"
+	exit 1
+fi
+
+modprobe i2c-dev
+
+# Checking if the i2c-dev module is successfuly loaded
+if [[ $? != 0 ]]
+then
+	echo "i2c-dev module cannot be loaded correctly. Make sur you have installed i2c-tools package"
+	exit 1
+fi
+
+interfaces=$(for i in $(i2cdetect -l | grep DesignWare | sed -r "s/^(i2c\-[0-9]+).*/\1/"); do echo $i; done)
 if [ -z "$interfaces" ]
 then
     echo "No interface i2c found. Make sure you have installed libevdev packages"
-    exit 0
+    exit 1
 fi
 
 touchpad_detected=false;
 for i in $interfaces; do
     echo -n "Testing interface $i : ";
     number=$(echo -n $i | cut -d'-' -f2)
-    i2c_test=$(sudo i2ctransfer -f -y $number w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad 2>&1)
+	offTouchpadCmd="i2ctransfer -f -y $number w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad 2>&1"
+    i2c_test=$($offTouchpadCmd)
     if [ -z "$i2c_test" ]
     then
         echo "sucess"
@@ -32,7 +48,7 @@ done;
 
 if [ "$touchpad_detected" = false ] ; then
     echo 'The detection was not successful. Touchpad not found.'
-    exit 0
+    exit 1
 fi
 
 has_symbols=false;
@@ -57,7 +73,7 @@ if [ "$has_symbols" = true ] ; then
         case $opt in
             "Qwerty")
                 echo "Copy asus python driver to /usr/bin/asus_touchpad_numpad.py"
-                cat touchpad_numpad_symbols.py | sed -r "s/KEY_APOSTROPHE/KEY_5/" | sudo tee /usr/bin/asus_touchpad_numpad.py >/dev/null
+                cat touchpad_numpad_symbols.py | sed -r "s/KEY_APOSTROPHE/KEY_5/" | tee /usr/bin/asus_touchpad_numpad.py >/dev/null
                 break
                 ;;
             "Azerty")
@@ -78,10 +94,27 @@ fi
 
 
 echo "Add asus touchpad service in /lib/systemd/system/"
-sudo cp ./asus_touchpad_numpad.service /lib/systemd/system/
-echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c-dev.conf >/dev/null
+cp ./asus_touchpad_numpad.service /lib/systemd/system/
+echo "i2c-dev" | tee /etc/modules-load.d/i2c-dev.conf >/dev/null
 
-sudo systemctl enable asus_touchpad_numpad
-echo "Asus touchpad service enabled"
-sudo systemctl restart asus_touchpad_numpad
-echo "Asus touchpad service started"
+systemctl enable asus_touchpad_numpad
+
+if [[ $? != 0 ]]
+then
+	echo "Something gone wrong while enabling asus_touchpad_numpad.service"
+	exit 1
+else
+	echo "Asus touchpad service enabled"
+fi
+
+systemctl restart asus_touchpad_numpad
+if [[ $? != 0 ]]
+then
+	echo "Something gone wrong while enabling asus_touchpad_numpad.service"
+	exit 1
+else
+	echo "Asus touchpad service started"
+fi
+
+exit 0
+
