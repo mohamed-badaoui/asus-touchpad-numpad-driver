@@ -35,8 +35,8 @@ def main():
                         touchpad = touchpad.split(" ")[0]
                         touchpad_detected = 2
 
-                # Look for the keyboard (numlock) # AT Translated Set
-                if keyboard_detected == 0 and "Name=\"AT Translated Set 2 keyboard" in line:
+                # Look for the keyboard (numlock) # AT Translated Set OR Asus Keyboard
+                if keyboard_detected == 0 and ("Name=\"AT Translated Set 2 keyboard" in line or "Name=\"Asus Keyboard" in line):
                     keyboard_detected = 1
         
                 if keyboard_detected == 1:

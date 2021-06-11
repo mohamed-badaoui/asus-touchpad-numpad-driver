@@ -10,6 +10,8 @@ It may work for other models.
 This python driver has been tested and works fine for these asus versions at the moment:
 - M433IA (with % and = symbols)
 - R424DA (without extra symbols)
+- ROG Strix G15 2021 
+- S413DA (with % and = symbols)
 - TM420 (with % and = symbols)
 - UM433DA (with % and = symbols)
 - UX425EA (with % and = symbols)
@@ -24,7 +26,6 @@ This python driver has been tested and works fine for these asus versions at the
 - UX333FA (without extra symbols)
 - UX325EA (with % and = symbols)
 - X412DA (without extra symbols)
-- S413DA (with % and = symbols)
 
 Install required packages
 
@@ -58,6 +59,11 @@ sudo ./install.sh
 ```
 
 To turn on/off numpad, tap top right corner touchpad area or F8 key.
+
+To uninstall, just run:
+```
+sudo ./uninstall.sh
+```
 
 It is an adaptation made thanks to:
  - solution published on reddit (https://www.reddit.com/r/linuxhardware/comments/f2vdad/a_service_handling_touchpad_numpad_switching_for/) 
