@@ -1,7 +1,6 @@
 [Unit]
 Description=Asus Touchpad to Numpad Handler
 After=sddm.service display-manager.service
-Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
