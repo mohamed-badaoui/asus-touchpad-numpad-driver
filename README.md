@@ -24,6 +24,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UX333FA (without extra symbols)
 - UX325EA (with % and = symbols)
 - X412DA (without extra symbols)
+- S413DA (with % and = symbols)
 
 Install required packages
 
