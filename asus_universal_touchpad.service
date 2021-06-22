@@ -1,0 +1,12 @@
+[Unit]
+Description=Asus Touchpad to Numpad Handler
+After=sddm.service display-manager.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/share/asus_touchpad_numpad-driver/touchpad_numpad_universal.py $LAYOUT $PERCENTAGE_KEY
+StandardInput=tty-force
+TimeoutSec=5
+
+[Install]
+WantedBy=default.target
