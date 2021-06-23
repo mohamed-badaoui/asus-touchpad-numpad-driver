@@ -3,7 +3,7 @@
 | Without % = symbols             |  With % = symbols       |  With % = symbols (but incompatible with the non-universal version) |
 |:-------------------------:|:-------------------------:|:-------------------------:|
 | Model/Layout = ux433fa          | Model/Layout = m433ia   | Model/Layout = ux581l |
-| ![without % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-ZenBook-UX433FA.jpg)  |  ![with % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-VivoBook-M433IA.jpg) | ![model ux581](https://raw.githubusercontent.com/YannikSc/asus-touchpad-numpad-driver/main/Asus-ZenBook-UX581l.jpg) |
+| ![without % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-ZenBook-UX433FA.jpg)  |  ![with % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-VivoBook-M433IA.jpg) | ![model ux581](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-ZenBook-UX581l.jpg) |
 
 This is a python service which enables switching between numpad and touchpad for the Asus UX433.
 It may work for other models.
@@ -27,7 +27,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UX333FA (without extra symbols)
 - UX325EA (with % and = symbols)
 - X412DA (without extra symbols)
-- UX581L (only universal driver)
+- UX581L (with % and = symbols)
 
 Install required packages
 
@@ -58,10 +58,6 @@ git clone https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver
 cd asus-touchpad-numpad-driver
 chmod +x ./install.sh
 sudo ./install.sh
-
-# For the universal driver
-chmod +x ./install_universal.sh
-sudo ./install_universal.sh
 ```
 
 To turn on/off numpad, tap top right corner touchpad area or F8 key.
@@ -69,10 +65,6 @@ To turn on/off numpad, tap top right corner touchpad area or F8 key.
 To uninstall, just run:
 ```
 sudo ./uninstall.sh
-
-# For the universal driver
-chmod +x ./uninstall_universal.sh
-sudo ./uninstall_universal.sh
 ```
 
 It is an adaptation made thanks to:
@@ -82,5 +74,5 @@ It is an adaptation made thanks to:
 For any question, please do not hesitate to follow this tread discussion
 (https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1810183)
 
-Thank you very much to all the contributors, mainly on launchpad, who made this device driver possible. (David/magellan-2000, Pilot6/hanipouspilot, Julian Oertel /clunphumb and so many others. GG!)
+Thank you very much to all the contributors, mainly on launchpad, who made this device driver possible. (David/magellan-2000, Pilot6/hanipouspilot, Julian Oertel /clunphumb, YannikSc and so many others. GG!)
 
