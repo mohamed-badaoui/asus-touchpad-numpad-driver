@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# -------------------------------------------------------
-# A shell script that uninstall python driver for Asus numpad 
-# MIT LICENSE file
-# Written by: Badaoui Mohamed 
-# Last updated on: 2021/04/04
-# -------------------------------------------------------
-
 if [[ $(id -u) != 0 ]]
 then
 	echo "Please, run this script as root (using sudo for example)"
@@ -42,10 +35,10 @@ then
 	exit 1
 fi
 
-rm -f /usr/bin/asus_touchpad_numpad.py
+rm -rf /usr/share/asus_touchpad_numpad-driver/
 if [[ $? != 0 ]]
 then
-	echo "/usr/bin/asus_touchpad_numpad.py cannot be removed correctly..."
+	echo "/usr/share/asus_touchpad_numpad-driver/ cannot be removed correctly..."
 	exit 1
 fi
 
