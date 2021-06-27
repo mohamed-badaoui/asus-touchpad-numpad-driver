@@ -29,7 +29,7 @@ while tries > 0:
             if touchpad_detected == 1:
                 if "S: " in line:
                     # search device id 
-                    device_id=re.sub(r".*i2c-([^/])/.*$", r'\1', line).replace("\n", "")
+                    device_id=re.sub(r".*i2c-(\d+)/.*$", r'\1', line).replace("\n", "")
 
                 if "H: " in line:
                     touchpad = line.split("event")[1]
