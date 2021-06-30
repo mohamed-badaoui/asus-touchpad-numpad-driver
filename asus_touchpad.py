@@ -86,6 +86,7 @@ model = 'm433ia' # Model used in the derived script (with symbols)
 # KEY_APOSTROPHE:40
 # [...]
 percentage_key = EV_KEY.KEY_5
+calculator_key = EV_KEY.KEY_CALC
 
 if len(sys.argv) > 1:
     model = sys.argv[1]
@@ -100,6 +101,7 @@ dev = Device()
 dev.name = "Asus Touchpad/Numpad"
 dev.enable(EV_KEY.KEY_LEFTSHIFT)
 dev.enable(EV_KEY.KEY_NUMLOCK)
+dev.enable(calculator_key)
 
 for col in model_layout.keys:
     for key in col:
@@ -132,6 +134,18 @@ def deactivate_numlock():
     udev.send_events(events)
     d_t.ungrab()
     subprocess.call(offCmd, shell=True)
+
+def launch_calculator():
+    try:
+        events = [
+            InputEvent(calculator_key, 1),
+            InputEvent(EV_SYN.SYN_REPORT, 0),
+            InputEvent(calculator_key, 0),
+            InputEvent(EV_SYN.SYN_REPORT, 0)
+        ]
+        udev.send_events(events)
+    except OSError as e:
+        pass
 
 numlock=False
 
@@ -200,6 +214,16 @@ while True:
                 activate_numlock()
             else:
                 deactivate_numlock()
+
+        # Check if caclulator was hit #
+        if (
+            e.matches(EV_KEY.BTN_TOOL_FINGER) and
+            e.value == 1 and
+            (x < 0.05 * maxx) and (y < 0.05 * maxy)
+        ):
+            finger = 0
+            launch_calculator()
+            continue
 
         # If touchpad mode, ignore #
         if not numlock:
