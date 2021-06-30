@@ -10,7 +10,7 @@ from time import sleep
 
 from libevdev import EV_ABS, EV_KEY, EV_LED, EV_SYN, Device, InputEvent
 
-tries=5
+tries = 5
 
 # Look into the devices file #
 while tries > 0:
@@ -19,16 +19,16 @@ while tries > 0:
     touchpad_detected = 0
 
     with open('/proc/bus/input/devices', 'r') as f:
-    
+
         lines = f.readlines()
         for line in lines:
             # Look for the touchpad #
             if touchpad_detected == 0 and ("Name=\"ASUE" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
                 touchpad_detected = 1
-    
+
             if touchpad_detected == 1:
                 if "S: " in line:
-                    # search device id 
+                    # search device id
                     device_id=re.sub(r".*i2c-(\d+)/.*$", r'\1', line).replace("\n", "")
 
                 if "H: " in line:
@@ -39,7 +39,7 @@ while tries > 0:
             # Look for the keyboard (numlock) # AT Translated Set OR Asus Keyboard
             if keyboard_detected == 0 and ("Name=\"AT Translated Set 2 keyboard" in line or "Name=\"Asus Keyboard" in line):
                 keyboard_detected = 1
-    
+
             if keyboard_detected == 1:
                 if "H: " in line:
                     keyboard = line.split("event")[1]
@@ -49,7 +49,7 @@ while tries > 0:
             # Stop looking if both have been found #
             if keyboard_detected == 2 and touchpad_detected == 2:
                 break
-    
+
     if keyboard_detected != 2 or touchpad_detected != 2:
         tries -= 1
         if tries == 0:
@@ -163,10 +163,10 @@ while True:
 
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
-        # ignore others events, except position and finger events 
+        # ignore others events, except position and finger events
         if not (
-            e.matches(EV_ABS.ABS_MT_POSITION_X) or 
-            e.matches(EV_ABS.ABS_MT_POSITION_Y) or 
+            e.matches(EV_ABS.ABS_MT_POSITION_X) or
+            e.matches(EV_ABS.ABS_MT_POSITION_Y) or
             e.matches(EV_KEY.BTN_TOOL_FINGER)
         ):
             continue
@@ -204,11 +204,11 @@ while True:
 
         # Check if numlock was hit #
         if (
-            e.matches(EV_KEY.BTN_TOOL_FINGER) and 
-            e.value == 1 and 
+            e.matches(EV_KEY.BTN_TOOL_FINGER) and
+            e.value == 1 and
             (x > 0.95 * maxx) and (y < 0.05 * maxy)
         ):
-            finger=0
+            finger = 0
             numlock = not numlock
             if numlock:
                 activate_numlock()
