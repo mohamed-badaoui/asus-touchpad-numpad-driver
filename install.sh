@@ -45,42 +45,54 @@ if [ "$touchpad_detected" = false ] ; then
 fi
 
 echo
-
-
 echo "Select models keypad layout:"
-models=$(cd numpad_layouts && ls *.py -D)
-
-for model in $models; do
-    echo ${model%.py}
+PS3='Please enter your choice [1-4]: '
+options=("m433ia" "ux433fa" "ux581l" "Quit")
+select opt in "${options[@]}"
+do
+    case "$opt" in
+        "m433ia")
+            model=m433ia
+            break
+            ;;
+        "ux433fa")
+            model=ux433fa
+            break
+            ;;
+        "ux581l" )
+            model=ux581l
+            break
+            ;;
+        "Quit")
+            exit 0
+            ;;
+        *)
+            echo "invalid option $REPLY";;
+    esac
 done
 
 echo
+echo "What is your keyboard layout?"
+PS3='Please enter your choice [1-3]: '
+options=("Qwerty" "Azerty" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Qwerty")
+            percentage_key=6 # Number 5
+            break
+            ;;
+        "Azerty")
+            percentage_key=40 # Apostrophe key
+            break
+            ;;
+        "Quit")
+            exit 0
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
 
-read -p "> " model
-
-if [ "$has_symbols" = true ] ; then
-    echo "What is your keyboard layout?"
-    PS3='Please enter your choice [1-3]: '
-    options=("Qwerty" "Azerty" "Quit")
-
-    select opt in "${options[@]}"
-    do
-        case $opt in
-            "Qwerty")
-                percentage_key=6 # Number 5
-                break
-                ;;
-            "Azerty")
-                percentage_key=40 # Apostrophe key
-                break
-                ;;
-            "Quit")
-                exit 0
-                ;;
-            *) echo "invalid option $REPLY";;
-        esac
-    done
-fi
 
 echo "Add asus touchpad service in /lib/systemd/system/"
 cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /lib/systemd/system/asus_touchpad_numpad.service
