@@ -58,7 +58,6 @@ Now you can get the latest ASUS Touchpad Numpad Driver for Linux from Git and in
 ```
 git clone https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver
 cd asus-touchpad-numpad-driver
-chmod +x ./install.sh
 sudo ./install.sh
 ```
 
