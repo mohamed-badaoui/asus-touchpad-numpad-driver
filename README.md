@@ -14,6 +14,7 @@ This python driver has been tested and works fine for these asus versions at the
 - ROG Strix G15 2021 
 - S413DA (with % and = symbols)
 - TM420 (with % and = symbols)
+- UM425IA (with % and = symbols)
 - UM433DA (with % and = symbols)
 - UX425EA (with % and = symbols)
 - UX425JA (with % and = symbols)
