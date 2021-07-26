@@ -31,6 +31,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UX325EA (with % and = symbols)
 - X412DA (without extra symbols)
 - UX581L (with % and = symbols)
+- UX325EA (with % and = symbols)
 
 Install required packages
 
