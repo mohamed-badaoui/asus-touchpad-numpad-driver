@@ -1,9 +1,8 @@
 [Unit]
 Description=Asus Touchpad to Numpad Handler
-After=sddm.service display-manager.service
 
 [Service]
-Type=simple
+Type=idle
 ExecStart=/usr/share/asus_touchpad_numpad-driver/asus_touchpad.py $LAYOUT $PERCENTAGE_KEY
 StandardInput=tty-force
 TimeoutSec=5
