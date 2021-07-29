@@ -116,7 +116,7 @@ udev = dev.create_uinput_device()
 finger = 0
 value = 0
 bright = 0
-bright_val = [ 31, 21, 1]
+bright_val = [ 31, 24, 1] # Low   Half   full
 
 subprocess.call("i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad", shell=True)
 
