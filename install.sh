@@ -44,6 +44,10 @@ if [ "$touchpad_detected" = false ] ; then
     exit 1
 fi
 
+if [[ -d numpad_layouts/__pycache__ ]] ; then
+    rm -rf numpad_layouts/__pycache__
+fi
+
 echo
 echo "Select models keypad layout:"
 PS3='Please enter your choice '
