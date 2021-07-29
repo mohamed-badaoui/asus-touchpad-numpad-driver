@@ -96,7 +96,7 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
     percentage_key = EV_KEY.codes[int(sys.argv[2])]
 
-model_layout = importlib.import_module('numpad_layouts.' + model)
+model_layout = importlib.import_module('numpad_layouts.'+ model)
 
 # Create a new keyboard device to send numpad events #
 dev = Device()
@@ -115,27 +115,33 @@ if percentage_key != EV_KEY.KEY_5:
 udev = dev.create_uinput_device()
 finger = 0
 value = 0
+bright = 0
+bright_val = [ 31, 21, 1]
 
-onCmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x01 0xad"
-offCmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+subprocess.call("i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad", shell=True)
 
-def activate_numlock():
+
+def activate_numlock(bright):
+    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad"
+
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
     ]
     udev.send_events(events)
     d_t.grab()
-    subprocess.call(onCmd, shell=True)
+    subprocess.call(numpad_cmd, shell=True)
 
 def deactivate_numlock():
+    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 0),
         InputEvent(EV_SYN.SYN_REPORT, 0)
     ]
     udev.send_events(events)
     d_t.ungrab()
-    subprocess.call(offCmd, shell=True)
+    subprocess.call(numpad_cmd, shell=True)
 
 def launch_calculator():
     try:
@@ -149,20 +155,25 @@ def launch_calculator():
     except OSError as e:
         pass
 
+def change_bright(status):    
+    if status >= len(bright_val) - 1:
+        bright = bright_val[0]
+        status = 0
+    else:
+        status+=1
+        bright = bright_val[status]
+    
+    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad"
+    
+
+    subprocess.call(numpad_cmd, shell=True)
+    return status
+
+
 numlock=False
 
 # Process events while running #
 while True:
-
-#    # If keyboard sends numlock event with F8 key tap, enable/disable touchpad events #
-#    for e in d_k.events():
-#        if e.matches(EV_KEY.KEY_F8) and e.value == 1:
-#            numlock = not numlock
-#            if numlock:
-#                activate_numlock()
-#            else:
-#                deactivate_numlock()
-
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
         # ignore others events, except position and finger events
@@ -203,17 +214,17 @@ while True:
             # Start of tap #
             if finger == 0 and e.value == 1:
                 finger = 1
-
         # Check if numlock was hit #
         if (
             e.matches(EV_KEY.BTN_TOOL_FINGER) and
             e.value == 1 and
-            (x > 0.95 * maxx) and (y < 0.05 * maxy)
+            (x > 0.95 * maxx) and (y < 0.09 * maxy)
         ):
             finger = 0
             numlock = not numlock
             if numlock:
-                activate_numlock()
+                activate_numlock(bright_val[0])
+                status = 0
             else:
                 deactivate_numlock()
 
@@ -221,10 +232,13 @@ while True:
         if (
             e.matches(EV_KEY.BTN_TOOL_FINGER) and
             e.value == 1 and
-            (x < 0.05 * maxx) and (y < 0.05 * maxy)
+            (x < 0.06 * maxx) and (y < 0.07 * maxy) and numlock == True
         ):
             finger = 0
-            launch_calculator()
+            ## status 1 = min bright
+            ## status 2 = middle bright
+            ## status 3 = max bright
+            status = change_bright(status)
             continue
 
         # If touchpad mode, ignore #
