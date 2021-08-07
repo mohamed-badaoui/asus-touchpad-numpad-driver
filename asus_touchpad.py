@@ -228,7 +228,18 @@ while True:
             else:
                 deactivate_numlock()
 
-        # Check if caclulator was hit #
+#        # Check if caclulator was hit #
+#        if (
+#            e.matches(EV_KEY.BTN_TOOL_FINGER) and
+#            e.value == 1 and
+#            (x < 0.06 * maxx) and (y < 0.07 * maxy) and numlock == True
+#        ):
+#            finger = 0
+#            ## status 1 = min bright
+#            ## status 2 = middle bright
+#            ## status 3 = max bright
+#            status = change_bright(status)
+#            continue
         if (
             e.matches(EV_KEY.BTN_TOOL_FINGER) and
             e.value == 1 and
@@ -240,6 +251,8 @@ while True:
             ## status 3 = max bright
             status = change_bright(status)
             continue
+
+
 
         # If touchpad mode, ignore #
         if not numlock:
