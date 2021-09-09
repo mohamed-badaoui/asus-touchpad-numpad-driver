@@ -7,6 +7,14 @@ then
 	exit 1
 fi
 
+if [[ $(sudo apt install 2>/dev/null) ]]; then
+    echo 'apt is here' && sudo apt -y install libevdev2 python3-libevdev i2c-tools git
+elif [[ $(sudo pacman -h 2>/dev/null) ]]; then
+    echo 'pacman is here' && sudo pacman --noconfirm -S libevdev python-libevdev i2c-tools git
+elif [[ $(sudo dnf install 2>/dev/null) ]]; then
+    echo 'dnf is here' && sudo dnf -y install libevdev python-libevdev i2c-tools git
+fi
+
 modprobe i2c-dev
 
 # Checking if the i2c-dev module is successfuly loaded
@@ -44,13 +52,18 @@ if [ "$touchpad_detected" = false ] ; then
     exit 1
 fi
 
+if [[ -d numpad_layouts/__pycache__ ]] ; then
+    rm -rf numpad_layouts/__pycache__
+fi
+
 echo
 echo "Select models keypad layout:"
-PS3='Please enter your choice [1-4]: '
-options=("m433ia" "ux433fa" "ux581l" "Quit")
+PS3='Please enter your choice '
+options=($(ls numpad_layouts) "Quit")
 select opt in "${options[@]}"
 do
-    case "$opt" in
+    opt=${opt::-3}
+    case $opt in
         "m433ia")
             model=m433ia
             break
@@ -63,7 +76,7 @@ do
             model=ux581l
             break
             ;;
-        "Quit")
+        "Q")
             exit 0
             ;;
         *)
@@ -94,8 +107,8 @@ do
 done
 
 
-echo "Add asus touchpad service in /lib/systemd/system/"
-cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /lib/systemd/system/asus_touchpad_numpad.service
+echo "Add asus touchpad service in /etc/systemd/system/"
+cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /etc/systemd/system/asus_touchpad_numpad.service
 
 mkdir -p /usr/share/asus_touchpad_numpad-driver/numpad_layouts
 install asus_touchpad.py /usr/share/asus_touchpad_numpad-driver/

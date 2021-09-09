@@ -1,6 +1,5 @@
 [Unit]
 Description=Asus Touchpad to Numpad Handler
-After=sddm.service display-manager.service
 
 [Service]
 Type=simple
