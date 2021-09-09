@@ -2,7 +2,7 @@
 Description=Asus Touchpad to Numpad Handler
 
 [Service]
-Type=idle
+Type=simple
 ExecStart=/usr/share/asus_touchpad_numpad-driver/asus_touchpad.py $LAYOUT $PERCENTAGE_KEY
 StandardInput=tty-force
 TimeoutSec=5
