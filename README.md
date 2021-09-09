@@ -27,6 +27,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UX371E (With % and = symbols)
 - UX362-FA (without extra symbols)
 - UX363EA (with % and = symbols)
+- UX363JA (with % and = symbols)
 - UX333FA (without extra symbols)
 - UX325EA (with % and = symbols)
 - X412DA (without extra symbols)
