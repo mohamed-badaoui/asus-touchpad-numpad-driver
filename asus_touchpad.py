@@ -112,15 +112,17 @@ for col in model_layout.keys:
 if percentage_key != EV_KEY.KEY_5:
     dev.enable(percentage_key)
 
+BRIGHT_VAL = [31, 24, 1] # Low   Half   full
+BRIGHT_VAL = [hex(val) for val in BRIGHT_VAL]
+
 udev = dev.create_uinput_device()
 finger = 0
 value = 0
-bright = 0
-bright_val = [ 31, 24, 1] # Low   Half   full
+brightness = 0
 
-# subprocess.call("i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad", shell=True)
-def activate_numlock(bright):
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad"
+# subprocess.call("i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] +" 0xad", shell=True)
+def activate_numlock(brightness):
+    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -151,12 +153,11 @@ def launch_calculator():
     except OSError as e:
         pass
 
-def change_bright(status):
-    status=(status+1)%3
-    bright = bright_val[status]
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad"
+def change_brightness(brightness):
+    brightness = (brightness + 1) % len(BRIGHT_VAL)
+    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
     subprocess.call(numpad_cmd, shell=True)
-    return status
+    return brightness
 
 numlock=False
 
@@ -211,8 +212,7 @@ while True:
             finger = 0
             numlock = not numlock
             if numlock:
-                activate_numlock(bright_val[0])
-                status = 0
+                activate_numlock(brightness)
             else:
                 deactivate_numlock()
 
@@ -227,7 +227,7 @@ while True:
                 ## status 1 = min bright
                 ## status 2 = middle bright
                 ## status 3 = max bright
-                status = change_bright(status)
+                brightness = change_brightness(brightness)
             else:
                 launch_calculator()
             continue
