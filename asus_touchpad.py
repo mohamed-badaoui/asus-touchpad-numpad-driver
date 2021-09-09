@@ -118,12 +118,9 @@ value = 0
 bright = 0
 bright_val = [ 31, 24, 1] # Low   Half   full
 
-subprocess.call("i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad", shell=True)
-
-
+# subprocess.call("i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad", shell=True)
 def activate_numlock(bright):
     numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad"
-
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -134,7 +131,6 @@ def activate_numlock(bright):
 
 def deactivate_numlock():
     numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
-
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 0),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -155,20 +151,12 @@ def launch_calculator():
     except OSError as e:
         pass
 
-def change_bright(status):    
-    if status >= len(bright_val) - 1:
-        bright = bright_val[0]
-        status = 0
-    else:
-        status+=1
-        bright = bright_val[status]
-    
+def change_bright(status):
+    status=(status+1)%3
+    bright = bright_val[status]
     numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + str(hex(bright)) +" 0xad"
-    
-
     subprocess.call(numpad_cmd, shell=True)
     return status
-
 
 numlock=False
 
@@ -228,18 +216,7 @@ while True:
             else:
                 deactivate_numlock()
 
-#        # Check if caclulator was hit #
-#        if (
-#            e.matches(EV_KEY.BTN_TOOL_FINGER) and
-#            e.value == 1 and
-#            (x < 0.06 * maxx) and (y < 0.07 * maxy) and numlock == True
-#        ):
-#            finger = 0
-#            ## status 1 = min bright
-#            ## status 2 = middle bright
-#            ## status 3 = max bright
-#            status = change_bright(status)
-#            continue
+       # Check if caclulator was hit #
         if (
             e.matches(EV_KEY.BTN_TOOL_FINGER) and
             e.value == 1 and
@@ -251,8 +228,6 @@ while True:
             ## status 3 = max bright
             status = change_bright(status)
             continue
-
-
 
         # If touchpad mode, ignore #
         if not numlock:
