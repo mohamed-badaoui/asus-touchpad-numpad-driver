@@ -8,11 +8,11 @@ then
 fi
 
 if [[ $(sudo apt install 2>/dev/null) ]]; then
-    echo 'apt is here' && sudo apt -y install libevdev2 python3-libevdev i2c-tools git 1>/dev/null
+    echo 'apt is here' && sudo apt -y install libevdev2 python3-libevdev i2c-tools git
 elif [[ $(sudo pacman -h 2>/dev/null) ]]; then
-    echo 'pacman is here' && sudo pacman --noconfirm -S libevdev python-libevdev i2c-tools git 1>/dev/null
+    echo 'pacman is here' && sudo pacman --noconfirm -S libevdev python-libevdev i2c-tools git
 elif [[ $(sudo dnf install 2>/dev/null) ]]; then
-    echo 'dnf is here' && sudo dnf -y install libevdev python-libevdev i2c-tools git 1>/dev/null
+    echo 'dnf is here' && sudo dnf -y install libevdev python-libevdev i2c-tools git
 fi
 
 modprobe i2c-dev
@@ -26,7 +26,7 @@ fi
 
 interfaces=$(for i in $(i2cdetect -l | grep DesignWare | sed -r "s/^(i2c\-[0-9]+).*/\1/"); do echo $i; done)
 if [ -z "$interfaces" ]
-then''
+then
     echo "No interface i2c found. Make sure you have installed libevdev packages"
     exit 1
 fi
