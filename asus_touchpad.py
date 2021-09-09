@@ -220,13 +220,16 @@ while True:
         if (
             e.matches(EV_KEY.BTN_TOOL_FINGER) and
             e.value == 1 and
-            (x < 0.06 * maxx) and (y < 0.07 * maxy) and numlock == True
+            (x < 0.06 * maxx) and (y < 0.07 * maxy)
         ):
             finger = 0
-            ## status 1 = min bright
-            ## status 2 = middle bright
-            ## status 3 = max bright
-            status = change_bright(status)
+            if numlock:
+                ## status 1 = min bright
+                ## status 2 = middle bright
+                ## status 3 = max bright
+                status = change_bright(status)
+            else:
+                launch_calculator()
             continue
 
         # If touchpad mode, ignore #
