@@ -112,15 +112,14 @@ for col in model_layout.keys:
 if percentage_key != EV_KEY.KEY_5:
     dev.enable(percentage_key)
 
-BRIGHT_VAL = [31, 24, 1] # Low   Half   full
-BRIGHT_VAL = [hex(val) for val in BRIGHT_VAL]
+# 31: Low, 24: Half, 1: Full
+BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
 
 udev = dev.create_uinput_device()
 finger = 0
 value = 0
 brightness = 0
 
-# subprocess.call("i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] +" 0xad", shell=True)
 def activate_numlock(brightness):
     numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
     events = [
@@ -153,6 +152,9 @@ def launch_calculator():
     except OSError as e:
         pass
 
+# status 1 = min bright
+# status 2 = middle bright
+# status 3 = max bright
 def change_brightness(brightness):
     brightness = (brightness + 1) % len(BRIGHT_VAL)
     numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
@@ -224,9 +226,6 @@ while True:
         ):
             finger = 0
             if numlock:
-                ## status 1 = min bright
-                ## status 2 = middle bright
-                ## status 3 = max bright
                 brightness = change_brightness(brightness)
             else:
                 launch_calculator()
