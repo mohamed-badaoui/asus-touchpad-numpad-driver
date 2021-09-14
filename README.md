@@ -65,6 +65,7 @@ sudo ./install.sh
 ```
 
 To turn on/off numpad, tap top right corner touchpad area.
+To adjust numpad brightness, tap top left corner touchpad area.
 
 To uninstall, just run:
 ```
