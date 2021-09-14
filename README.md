@@ -64,7 +64,7 @@ cd asus-touchpad-numpad-driver
 sudo ./install.sh
 ```
 
-To turn on/off numpad, tap top right corner touchpad area or F8 key.
+To turn on/off numpad, tap top right corner touchpad area.
 
 To uninstall, just run:
 ```
@@ -78,5 +78,5 @@ It is an adaptation made thanks to:
 For any question, please do not hesitate to follow this tread discussion
 (https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1810183)
 
-Thank you very much to all the contributors, mainly on launchpad, who made this device driver possible. (David/magellan-2000, Pilot6/hanipouspilot, Julian Oertel /clunphumb, YannikSc and so many others. GG!)
+Thank you very much to all the contributors, mainly on launchpad, who made this device driver possible. (Kawaegle, David/magellan-2000, Pilot6/hanipouspilot, Julian Oertel /clunphumb, YannikSc and so many others. GG!)
 
