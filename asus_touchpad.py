@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
+import importlib
+import math
 import re
 import subprocess
 import sys
-import math
-import importlib
 from fcntl import F_SETFL, fcntl
 from os import O_NONBLOCK
 from subprocess import PIPE, Popen
@@ -241,7 +241,7 @@ while True:
 
             try:
                 col = math.floor(model_layout.cols * x / maxx)
-                row = math.floor((model_layout.rows * y / maxy) - 0.3) # Subtract 0.3 (a third key) as the UX581L has about a third key space at the top
+                row = math.floor((model_layout.rows * y / maxy) - model_layout.top_offset)
 
                 if row < 0:
                     continue
@@ -254,9 +254,9 @@ while True:
                 # Send press key event #
                 if value == percentage_key:
                     events = [
-                            InputEvent(EV_KEY.KEY_LEFTSHIFT, 1),
-                            InputEvent(value, 1),
-                            InputEvent(EV_SYN.SYN_REPORT, 0)
+                        InputEvent(EV_KEY.KEY_LEFTSHIFT, 1),
+                        InputEvent(value, 1),
+                        InputEvent(EV_SYN.SYN_REPORT, 0)
                     ]
                 else:
                     events = [
