@@ -2,6 +2,8 @@ from libevdev import EV_KEY
 
 cols = 4 # As the UX581L has a "vertical numpad"
 rows = 5 # Compared to the more "horizontal" version of the UM433DA (for example)
+# Subtract 0.3 (a third key) as the UX581L has about a third key space at the top
+top_offset = 0.3
 
 keys = [
     [EV_KEY.KEY_KPEQUAL, EV_KEY.KEY_5, EV_KEY.KEY_BACKSPACE, EV_KEY.KEY_BACKSPACE],

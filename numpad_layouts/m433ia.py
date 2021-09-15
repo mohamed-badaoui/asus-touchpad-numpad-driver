@@ -2,6 +2,7 @@ from libevdev import EV_KEY
 
 cols = 5
 rows = 4
+top_offset = 0.3
 
 keys = [
     [EV_KEY.KEY_KP7, EV_KEY.KEY_KP8, EV_KEY.KEY_KP9, EV_KEY.KEY_KPSLASH, EV_KEY.KEY_BACKSPACE],
