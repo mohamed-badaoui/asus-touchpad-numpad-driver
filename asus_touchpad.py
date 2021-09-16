@@ -12,7 +12,15 @@ from time import sleep
 
 from libevdev import EV_ABS, EV_KEY, EV_LED, EV_SYN, Device, InputEvent
 
-tries = 5
+model = 'm433ia' # Model used in the derived script (with symbols)
+if len(sys.argv) > 1:
+    model = sys.argv[1]
+model_layout = importlib.import_module('numpad_layouts.'+ model)
+
+if len(sys.argv) > 2:
+    percentage_key = EV_KEY.codes[int(sys.argv[2])]
+
+tries = model_layout.try_times
 
 # Look into the devices file #
 while tries > 0:
@@ -65,7 +73,7 @@ while tries > 0:
     else:
         break
 
-    sleep(0.1)
+    sleep(model_layout.try_sleep)
 
 # Start monitoring the touchpad #
 fd_t = open('/dev/input/event' + str(touchpad), 'rb')
@@ -82,21 +90,12 @@ fd_k = open('/dev/input/event' + str(keyboard), 'rb')
 fcntl(fd_k, F_SETFL, O_NONBLOCK)
 d_k = Device(fd_k)
 
-model = 'm433ia' # Model used in the derived script (with symbols)
 
 # KEY_5:6
 # KEY_APOSTROPHE:40
 # [...]
 percentage_key = EV_KEY.KEY_5
 calculator_key = EV_KEY.KEY_CALC
-
-if len(sys.argv) > 1:
-    model = sys.argv[1]
-
-if len(sys.argv) > 2:
-    percentage_key = EV_KEY.codes[int(sys.argv[2])]
-
-model_layout = importlib.import_module('numpad_layouts.'+ model)
 
 # Create a new keyboard device to send numpad events #
 dev = Device()

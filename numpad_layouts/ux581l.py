@@ -1,5 +1,9 @@
 from libevdev import EV_KEY
 
+# Number of tries to identify the interface number
+try_times = 5
+try_sleep = 0.1
+
 cols = 4 # As the UX581L has a "vertical numpad"
 rows = 5 # Compared to the more "horizontal" version of the UM433DA (for example)
 # Subtract 0.3 (a third key) as the UX581L has about a third key space at the top

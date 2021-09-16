@@ -1,5 +1,9 @@
 from libevdev import EV_KEY
 
+# Number of tries to identify the interface number
+try_times = 5
+try_sleep = 0.1
+
 cols = 5
 rows = 4
 top_offset = 0.3
