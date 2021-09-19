@@ -4,6 +4,7 @@ import importlib
 import math
 import re
 import subprocess
+import os
 import sys
 from fcntl import F_SETFL, fcntl
 from os import O_NONBLOCK
@@ -16,9 +17,12 @@ from typing import Optional
 import libevdev.const
 from libevdev import EV_ABS, EV_KEY, EV_LED, EV_SYN, Device, InputEvent
 
-logging.basicConfig(level=logging.INFO)
+# Setup logging
+# LOG=DEBUG sudo -E ./asus-touchpad-numpad-driver  # all messages
+# LOG=ERROR sudo -E ./asus-touchpad-numpad-driver  # only error messages
+logging.basicConfig()
 log = logging.getLogger('Pad')
-log.setLevel(logging.DEBUG)
+log.setLevel(os.environ.get('LOG', 'INFO'))
 
 
 # Select model from command line
@@ -105,12 +109,15 @@ else:
 fd_t = open('/dev/input/event' + str(touchpad), 'rb')
 fcntl(fd_t, F_SETFL, O_NONBLOCK)
 d_t = Device(fd_t)
+
+
 # Retrieve touchpad dimensions #
+
 ai = d_t.absinfo[EV_ABS.ABS_X]
 (minx, maxx) = (ai.minimum, ai.maximum)
 ai = d_t.absinfo[EV_ABS.ABS_Y]
 (miny, maxy) = (ai.minimum, ai.maximum)
-
+log.debug('Touchpad min-max: x %d-%d, y %d-%d', minx, maxx, miny, maxy)
 
 
 # Start monitoring the keyboard (numlock)
@@ -135,10 +142,12 @@ for col in model_layout.keys:
 if percentage_key != EV_KEY.KEY_5:
     dev.enable(percentage_key)
 
-# 31: Low, 24: Half, 1: Full
-BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
-
 udev = dev.create_uinput_device()
+
+
+# Brightness 31: Low, 24: Half, 1: Full
+
+BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
 
 
 def activate_numlock(brightness):
@@ -189,39 +198,31 @@ def change_brightness(brightness):
 
 # Run - process and act on events
 
-numlock = False
+numlock: bool = False
 pos_x: int = 0
 pos_y: int = 0
 button_pressed: libevdev.const = None
-finger: int = 0
 brightness: int = 0
 
 while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
-        # ignore others events, except position and finger events
-        if not (
-            e.matches(EV_ABS.ABS_MT_POSITION_X) or
-            e.matches(EV_ABS.ABS_MT_POSITION_Y) or
-            e.matches(EV_KEY.BTN_TOOL_FINGER)
-        ):
-            continue
 
         # Get x position #
         if e.matches(EV_ABS.ABS_MT_POSITION_X):
             x = e.value
-            continue
+
         # Get y position #
-        if e.matches(EV_ABS.ABS_MT_POSITION_Y):
+        elif e.matches(EV_ABS.ABS_MT_POSITION_Y):
             y = e.value
-            continue
 
         # If tap #
-        if e.matches(EV_KEY.BTN_TOOL_FINGER):
+        elif e.matches(EV_KEY.BTN_TOOL_FINGER):
+
             # If end of tap, send release key event #
             if e.value == 0:
                 log.debug('finger up at x %d y %d', x, y)
-                finger = 0
+
                 if button_pressed:
                     log.debug('send key up event %s', button_pressed)
                     events = [
@@ -232,80 +233,62 @@ while True:
                     try:
                         udev.send_events(events)
                         button_pressed = None
-                    except OSError as e:
+                    except OSError as err:
+                        log.error("Cannot send release event, %s", err)
                         pass
 
-            # Start of tap #
-            if finger == 0 and e.value == 1:
+            elif e.value == 1 and not button_pressed:
+                # Start of tap #
                 log.debug('finger down at x %d y %d', x, y)
-                finger = 1
-        # Check if numlock was hit #
-        if (
-            e.matches(EV_KEY.BTN_TOOL_FINGER) and
-            e.value == 1 and
-            (x > 0.95 * maxx) and (y < 0.09 * maxy)
-        ):
-            finger = 0
-            numlock = not numlock
-            if numlock:
-                activate_numlock(brightness)
-            else:
-                deactivate_numlock()
 
-       # Check if caclulator was hit #
-        if (
-            e.matches(EV_KEY.BTN_TOOL_FINGER) and
-            e.value == 1 and
-            (x < 0.06 * maxx) and (y < 0.07 * maxy)
-        ):
-            finger = 0
-            if numlock:
-                brightness = change_brightness(brightness)
-            else:
-                launch_calculator()
-            continue
+                # Check if numlock was hit #
+                if (x > 0.95 * maxx) and (y < 0.09 * maxy):
+                    numlock = not numlock
+                    if numlock:
+                        activate_numlock(brightness)
+                    else:
+                        deactivate_numlock()
 
-        # If touchpad mode, ignore #
-        if not numlock:
-            continue
+                # Check if caclulator was hit #
+                elif (x < 0.06 * maxx) and (y < 0.07 * maxy):
+                    if numlock:
+                        brightness = change_brightness(brightness)
+                    else:
+                        launch_calculator()
+                    continue
 
-        # During tap #
-        if finger == 1:
-            finger = 2
+                # If touchpad mode, check key #
+                elif numlock:
 
-            col = math.floor(model_layout.cols * x / maxx)
-            row = math.floor((model_layout.rows * y / maxy) - model_layout.top_offset)
+                    col = math.floor(model_layout.cols * x / (maxx+1) )
+                    row = math.floor((model_layout.rows * y / maxy) - model_layout.top_offset)
+                    try:
+                        button_pressed = model_layout.keys[row][col]
+                    except IndexError:
+                        # skip invalid row and col values
+                        log.debug('Unhandled col/row %d/%d for position %d-%d', col, row, x, y)
+                        continue
+                    
+                    if button_pressed == EV_KEY.KEY_5:
+                        button_pressed = percentage_key
 
-            if row < 0:
-                continue
+                    # Send press key event #
+                    log.debug('send press key event %s', button_pressed)
 
-            button_pressed = model_layout.keys[row][col]
+                    if button_pressed == percentage_key:
+                        events = [
+                            InputEvent(EV_KEY.KEY_LEFTSHIFT, 1),
+                            InputEvent(button_pressed, 1),
+                            InputEvent(EV_SYN.SYN_REPORT, 0)
+                        ]
+                    else:
+                        events = [
+                            InputEvent(button_pressed, 1),
+                            InputEvent(EV_SYN.SYN_REPORT, 0)
+                        ]
 
-            if button_pressed == EV_KEY.KEY_5:
-                button_pressed = percentage_key
-
-            # Send press key event #
-            log.debug('send press key event %s', button_pressed)
-
-            if button_pressed == percentage_key:
-                events = [
-                    InputEvent(EV_KEY.KEY_LEFTSHIFT, 1),
-                    InputEvent(button_pressed, 1),
-                    InputEvent(EV_SYN.SYN_REPORT, 0)
-                ]
-            else:
-                events = [
-                    InputEvent(button_pressed, 1),
-                    InputEvent(EV_SYN.SYN_REPORT, 0)
-                ]
-
-            try:
-                udev.send_events(events)
-            except OSError as e:
-                pass
+                    try:
+                        udev.send_events(events)
+                    except OSError as err:
+                        log.warning("Cannot send press event, %s", err)
     sleep(0.1)
-
-
-# Close file descriptors
-fd_k.close()
-fd_t.close()
