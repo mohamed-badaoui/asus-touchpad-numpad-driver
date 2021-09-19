@@ -11,6 +11,8 @@ from subprocess import PIPE, Popen
 from time import sleep
 import logging
 
+from typing import Optional
+
 import libevdev.const
 from libevdev import EV_ABS, EV_KEY, EV_LED, EV_SYN, Device, InputEvent
 
@@ -36,68 +38,66 @@ model_layout = importlib.import_module('numpad_layouts.'+ model)
 if len(sys.argv) > 2:
     percentage_key = EV_KEY.codes[int(sys.argv[2])]
 
-tries = model_layout.try_times
 
 
-# Find devices from device file
+# Figure out devices from devices file
 
-while tries > 0:
+touchpad: Optional[str] = None
+keyboard: Optional[str] = None
+device_id: Optional[str] = None
 
-    keyboard_detected = 0
-    touchpad_detected = 0
+for one_try in range(model_layout.try_times):
 
     with open('/proc/bus/input/devices', 'r') as f:
-
-        lines = f.readlines()
+        # iterate over lines, once (through all for loops)
+        lines = iter(f.readlines())
         for line in lines:
-            # Look for the touchpad #
-            if touchpad_detected == 0 and ("Name=\"ASUE" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
-                log.info('Detect touchpad from %s', line.strip())
-                touchpad_detected = 1
+            if line.startswith('N:'):
 
-            if touchpad_detected == 1:
-                if "S: " in line:
-                    # search device id
-                    device_id=re.sub(r".*i2c-(\d+)/.*$", r'\1', line).replace("\n", "")
-                    log.info('Set touchpad device id %s from %s', device_id, line.strip())
+                # Look for the touchpad #
+                if not touchpad and ("Name=\"ASUE" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
+                    log.info('Detect touchpad from %s', line.strip())
 
-                if "H: " in line:
-                    touchpad = line.split("event")[1]
-                    touchpad = touchpad.split(" ")[0]
-                    touchpad_detected = 2
-                    log.info('Set touchpad id %s from %s', touchpad, line.strip())
+                    for line in lines:
+                        if line.startswith('S:'):
+                            # search device id
+                            device_id=re.sub(r".*i2c-(\d+)/.*$", r'\1', line).replace("\n", "")
+                            log.info('Set touchpad device id %s from %s', device_id, line.strip())
+                        elif line.startswith('H:'):
+                            # touchpad device
+                            touchpad = line.split("event")[1].split(" ")[0]
+                            log.info('Set touchpad id %s from %s', touchpad, line.strip())
+                        elif not line.strip():
+                            break
 
-            # Look for the keyboard (numlock) # AT Translated Set OR Asus Keyboard
-            if keyboard_detected == 0 and ("Name=\"AT Translated Set 2 keyboard" in line or "Name=\"Asus Keyboard" in line):
-                keyboard_detected = 1
-                log.info('Detect keyboard from %s', line.strip())
+                # Look for the keyboard (numlock) # AT Translated Set OR Asus Keyboard
+                elif not keyboard and ("Name=\"AT Translated Set 2 keyboard" in line or "Name=\"Asus Keyboard" in line):
+                    log.info('Detect keyboard from %s', line.strip())
 
-            if keyboard_detected == 1:
-                if "H: " in line:
-                    keyboard = line.split("event")[1]
-                    keyboard = keyboard.split(" ")[0]
-                    keyboard_detected = 2
-                    log.info('Set keyboard %s from %s', keyboard, line.strip())
+                    for line in lines:
+                        if line.startswith('H:'):
+                            # keyboard device
+                            keyboard = line.split("event")[1].split(" ")[0]
+                            log.info('Set keyboard %s from %s', keyboard, line.strip())
+                            break
+                        elif not line.strip():
+                            break
 
-            # Stop looking if both have been found #
-            if keyboard_detected == 2 and touchpad_detected == 2:
-                break
-
-    if keyboard_detected != 2 or touchpad_detected != 2:
-        tries -= 1
-        if tries == 0:
-            if keyboard_detected != 2:
-                log.error("Can't find keyboard")
-            if touchpad_detected != 2:
-                log.error("Can't find touchpad")
-            if touchpad_detected == 2 and not device_id.isnumeric():
-                log.error("Can't find device id")
-            sys.exit(1)
-    else:
-        break
+        if keyboard is not None and touchpad is not None and device_id is not None:
+            break
 
     sleep(0.1)
-
+else:
+    # Couldn't properly detect keyboard or touchpad
+    if keyboard is None:
+        log.error("Can't find keyboard")
+    if touchpad is None:
+        log.error("Can't find touchpad")
+    if device_id is None:
+        log.error("Can't find device id")
+    elif not device_id.isnumeric():
+        log.error("Unknown touchpad device id %s", device_id)
+    sys.exit(1)
 
 
 # Start monitoring the touchpad
