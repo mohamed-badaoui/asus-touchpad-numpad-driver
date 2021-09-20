@@ -15,6 +15,7 @@ This python driver has been tested and works fine for these asus versions at the
 - S413DA (with % and = symbols)
 - TM420 (with % and = symbols)
 - UM425IA (with % and = symbols)
+- UM431DA (without extra symbols)
 - UM433DA (with % and = symbols)
 - UX425EA (with % and = symbols)
 - UX425JA (with % and = symbols)
@@ -51,7 +52,7 @@ sudo pacman -S libevdev python-libevdev i2c-tools git
 sudo dnf install libevdev python-libevdev i2c-tools git
 ```
 
-Then enabble i2c
+Then enable i2c
 ```
 sudo modprobe i2c-dev
 sudo i2cdetect -l
@@ -70,6 +71,13 @@ To adjust numpad brightness, tap top left corner touchpad area.
 To uninstall, just run:
 ```
 sudo ./uninstall.sh
+```
+
+**Troubleshooting**
+
+For some operating systems with boot failure (Pop!OS, Mint, ElementaryOS, SolusOS), before installing, please uncomment in the asus_touchpad.service file, this following property and adjust its value:
+```
+# ExecStartPre=/bin/sleep 2
 ```
 
 It is an adaptation made thanks to:
