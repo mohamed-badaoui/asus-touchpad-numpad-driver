@@ -58,7 +58,7 @@ fi
 
 echo
 echo "Select models keypad layout:"
-PS3='Please enter your choice '
+PS3='Please enter your choice [1-5]: '
 options=($(ls numpad_layouts) "Quit")
 select opt in "${options[@]}"
 do
@@ -74,6 +74,10 @@ do
             ;;
         "ux581l" )
             model=ux581l
+            break
+            ;;
+        "gx701" )
+            model=gx701
             break
             ;;
         "Q")

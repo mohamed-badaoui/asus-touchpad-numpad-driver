@@ -12,10 +12,10 @@ from time import sleep
 
 from libevdev import EV_ABS, EV_KEY, EV_LED, EV_SYN, Device, InputEvent
 
-model = 'm433ia' # Model used in the derived script (with symbols)
+model = 'gx701'  # Model used in the derived script (with symbols)
 if len(sys.argv) > 1:
     model = sys.argv[1]
-model_layout = importlib.import_module('numpad_layouts.'+ model)
+model_layout = importlib.import_module('numpad_layouts.' + model)
 
 if len(sys.argv) > 2:
     percentage_key = EV_KEY.codes[int(sys.argv[2])]
@@ -34,12 +34,13 @@ while tries > 0:
         for line in lines:
             # Look for the touchpad #
             if touchpad_detected == 0 and ("Name=\"ASUE" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
+                print("Touchpad detected: " + line)
                 touchpad_detected = 1
 
             if touchpad_detected == 1:
                 if "S: " in line:
                     # search device id
-                    device_id=re.sub(r".*i2c-(\d+)/.*$", r'\1', line).replace("\n", "")
+                    device_id = re.sub(r".*i2c-(\d+)/.*$", r'\1', line).replace("\n", "")
 
                 if "H: " in line:
                     touchpad = line.split("event")[1]
@@ -48,6 +49,7 @@ while tries > 0:
 
             # Look for the keyboard (numlock) # AT Translated Set OR Asus Keyboard
             if keyboard_detected == 0 and ("Name=\"AT Translated Set 2 keyboard" in line or "Name=\"Asus Keyboard" in line):
+                print("Keyboard_detected detected: " + line)
                 keyboard_detected = 1
 
             if keyboard_detected == 1:
@@ -115,41 +117,57 @@ if percentage_key != EV_KEY.KEY_5:
 BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
 
 udev = dev.create_uinput_device()
-finger = 0
-value = 0
+x = 0
+y = 0
 brightness = 0
+numlock = False
+
+#try:
+#    sub_value = subprocess.check_output('xset -q | grep "Num Lock" | cut -c 46-48', shell=True).decode().strip()
+#    if str(sub_value) == 'on':
+#        numlock = True
+#except OSError as e:
+#    pass
+
+
+def press_key(pressed_key):
+    try:
+        udev.send_events([
+            InputEvent(pressed_key, 1),
+            InputEvent(EV_SYN.SYN_REPORT, 0),
+        ])
+    except OSError as e:
+        pass
+
+
+def release_key(released_key):
+    try:
+        udev.send_events([
+            InputEvent(released_key, 0),
+            InputEvent(EV_SYN.SYN_REPORT, 0),
+        ])
+    except OSError as e:
+        pass
+
+
+def send_key(sent_key):
+    press_key(sent_key)
+    release_key(sent_key)
+
 
 def activate_numlock(brightness):
     numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
-    events = [
-        InputEvent(EV_KEY.KEY_NUMLOCK, 1),
-        InputEvent(EV_SYN.SYN_REPORT, 0)
-    ]
-    udev.send_events(events)
+    press_key(EV_KEY.KEY_NUMLOCK)
     d_t.grab()
     subprocess.call(numpad_cmd, shell=True)
 
+
 def deactivate_numlock():
     numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
-    events = [
-        InputEvent(EV_KEY.KEY_NUMLOCK, 0),
-        InputEvent(EV_SYN.SYN_REPORT, 0)
-    ]
-    udev.send_events(events)
+    release_key(EV_KEY.KEY_NUMLOCK)
     d_t.ungrab()
     subprocess.call(numpad_cmd, shell=True)
 
-def launch_calculator():
-    try:
-        events = [
-            InputEvent(calculator_key, 1),
-            InputEvent(EV_SYN.SYN_REPORT, 0),
-            InputEvent(calculator_key, 0),
-            InputEvent(EV_SYN.SYN_REPORT, 0)
-        ]
-        udev.send_events(events)
-    except OSError as e:
-        pass
 
 # status 1 = min bright
 # status 2 = middle bright
@@ -160,17 +178,16 @@ def change_brightness(brightness):
     subprocess.call(numpad_cmd, shell=True)
     return brightness
 
-numlock=False
 
 # Process events while running #
 while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
     for e in d_t.events():
-        # ignore others events, except position and finger events
+        # ignore others events, except position and tracking release
         if not (
             e.matches(EV_ABS.ABS_MT_POSITION_X) or
             e.matches(EV_ABS.ABS_MT_POSITION_Y) or
-            e.matches(EV_KEY.BTN_TOOL_FINGER)
+            e.matches(EV_ABS.ABS_MT_TRACKING_ID)
         ):
             continue
 
@@ -178,66 +195,36 @@ while True:
         if e.matches(EV_ABS.ABS_MT_POSITION_X):
             x = e.value
             continue
+
         # Get y position #
         if e.matches(EV_ABS.ABS_MT_POSITION_Y):
             y = e.value
             continue
 
-        # If tap #
-        if e.matches(EV_KEY.BTN_TOOL_FINGER):
-            # If end of tap, send release key event #
-            if e.value == 0:
-                finger = 0
-                try:
-                    if value:
-                        events = [
-                            InputEvent(EV_KEY.KEY_LEFTSHIFT, 0),
-                            InputEvent(value, 0),
-                            InputEvent(EV_SYN.SYN_REPORT, 0)
-                        ]
-                        udev.send_events(events)
-                        value = None
-                    pass
-                except OSError as e:
-                    pass
-
-            # Start of tap #
-            if finger == 0 and e.value == 1:
-                finger = 1
-        # Check if numlock was hit #
-        if (
-            e.matches(EV_KEY.BTN_TOOL_FINGER) and
-            e.value == 1 and
-            (x > 0.95 * maxx) and (y < 0.09 * maxy)
+        if (e.matches(EV_ABS.ABS_MT_TRACKING_ID) and
+            e.value == -1
         ):
-            finger = 0
-            numlock = not numlock
-            if numlock:
-                activate_numlock(brightness)
-            else:
-                deactivate_numlock()
+            # Check if numlock was hit #
+            if (model_layout.touchpad_num_lock == 1 and (x > 0.95 * maxx) and (y < 0.09 * maxy)):
+                numlock = not numlock
+                if numlock:
+                    activate_numlock(brightness)
+                else:
+                    deactivate_numlock()
 
-       # Check if caclulator was hit #
-        if (
-            e.matches(EV_KEY.BTN_TOOL_FINGER) and
-            e.value == 1 and
-            (x < 0.06 * maxx) and (y < 0.07 * maxy)
-        ):
-            finger = 0
-            if numlock:
-                brightness = change_brightness(brightness)
-            else:
-                launch_calculator()
-            continue
+            # Check if calculator was hit #
+            if (model_layout.touchpad_calculator == 1 and (x < 0.06 * maxx) and (y < 0.07 * maxy)):
+                if numlock:
+                    brightness = change_brightness(brightness)
+                else:
+                    send_key(calculator_key)
+                continue
 
-        # If touchpad mode, ignore #
-        if not numlock:
-            continue
+            # If touchpad mode, ignore #
+            if not numlock:
+                continue
 
-        # During tap #
-        if finger == 1:
-            finger = 2
-
+            # Release finger after touchpad movement #
             try:
                 col = math.floor(model_layout.cols * x / maxx)
                 row = math.floor((model_layout.rows * y / maxy) - model_layout.top_offset)
@@ -247,25 +234,21 @@ while True:
 
                 value = model_layout.keys[row][col]
 
-                if value == EV_KEY.KEY_5:
-                    value = percentage_key
-
                 # Send press key event #
-                if value == percentage_key:
-                    events = [
-                        InputEvent(EV_KEY.KEY_LEFTSHIFT, 1),
-                        InputEvent(value, 1),
-                        InputEvent(EV_SYN.SYN_REPORT, 0)
-                    ]
+                if value == EV_KEY.KEY_5:
+                    press_key(EV_KEY.KEY_LEFTSHIFT)
+                    send_key(percentage_key)
+                    release_key(EV_KEY.KEY_LEFTSHIFT)
                 else:
-                    events = [
-                        InputEvent(value, 1),
-                        InputEvent(EV_SYN.SYN_REPORT, 0)
-                    ]
-
-                udev.send_events(events)
+                    send_key(value)
             except OSError as e:
                 pass
+
+    for e in d_k.events():
+        # Get num lock is pressed from internal or external keyboard
+        if e.matches(EV_LED.LED_NUML):
+            numlock = bool(e.value)
+            continue
     sleep(0.1)
 
 # Close file descriptors #

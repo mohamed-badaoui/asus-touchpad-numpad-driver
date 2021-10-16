@@ -1,3 +1,5 @@
 # IDEs and editors
 .history
-__pycache__
+__pycache_
+
+.idea
