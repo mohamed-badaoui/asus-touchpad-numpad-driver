@@ -76,6 +76,10 @@ do
             model=ux581l
             break
             ;;
+        "gx701" )
+            model=gx701
+            break
+            ;;
         "Q")
             exit 0
             ;;
