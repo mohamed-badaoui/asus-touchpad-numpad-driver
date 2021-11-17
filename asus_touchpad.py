@@ -50,31 +50,31 @@ while tries > 0:
             # Look for the touchpad #
             if touchpad_detected == 0 and ("Name=\"ASUE" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
                 touchpad_detected = 1
-                log.info('Detect touchpad from %s', line.strip())
+                log.debug('Detect touchpad from %s', line.strip())
 
             if touchpad_detected == 1:
                 if "S: " in line:
                     # search device id
                     device_id=re.sub(r".*i2c-(\d+)/.*$", r'\1', line).replace("\n", "")
-                    log.info('Set touchpad device id %s from %s', device_id, line.strip())
+                    log.debug('Set touchpad device id %s from %s', device_id, line.strip())
 
                 if "H: " in line:
                     touchpad = line.split("event")[1]
                     touchpad = touchpad.split(" ")[0]
                     touchpad_detected = 2
-                    log.info('Set touchpad id %s from %s', touchpad, line.strip())
+                    log.debug('Set touchpad id %s from %s', touchpad, line.strip())
 
             # Look for the keyboard (numlock) # AT Translated Set OR Asus Keyboard
             if keyboard_detected == 0 and ("Name=\"AT Translated Set 2 keyboard" in line or "Name=\"Asus Keyboard" in line):
                 keyboard_detected = 1
-                log.info('Detect keyboard from %s', line.strip())
+                log.debug('Detect keyboard from %s', line.strip())
 
             if keyboard_detected == 1:
                 if "H: " in line:
                     keyboard = line.split("event")[1]
                     keyboard = keyboard.split(" ")[0]
                     keyboard_detected = 2
-                    log.info('Set keyboard %s from %s', keyboard, line.strip())
+                    log.debug('Set keyboard %s from %s', keyboard, line.strip())
 
             # Stop looking if both have been found #
             if keyboard_detected == 2 and touchpad_detected == 2:

@@ -64,6 +64,10 @@ select opt in "${options[@]}"
 do
     opt=${opt::-3}
     case $opt in
+        "gx701" )
+            model=gx701
+            break
+            ;;
         "m433ia")
             model=m433ia
             break
@@ -74,10 +78,6 @@ do
             ;;
         "ux581l" )
             model=ux581l
-            break
-            ;;
-        "gx701" )
-            model=gx701
             break
             ;;
         "Q")
