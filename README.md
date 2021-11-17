@@ -75,10 +75,16 @@ sudo ./uninstall.sh
 
 **Troubleshooting**
 
+To activate logger, do in a console:
+```
+LOG=DEBUG sudo -E ./asus_touchpad.py
+```
+
 For some operating systems with boot failure (Pop!OS, Mint, ElementaryOS, SolusOS), before installing, please uncomment in the asus_touchpad.service file, this following property and adjust its value:
 ```
 # ExecStartPre=/bin/sleep 2
 ```
+
 
 It is an adaptation made thanks to:
  - solution published on reddit (https://www.reddit.com/r/linuxhardware/comments/f2vdad/a_service_handling_touchpad_numpad_switching_for/) 
