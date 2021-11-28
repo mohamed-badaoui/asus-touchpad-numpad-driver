@@ -3,7 +3,7 @@
 | Without % = symbols             |  With % = symbols       |  With % = symbols (but incompatible with the non-universal version) |
 |:-------------------------:|:-------------------------:|:-------------------------:|
 | Model/Layout = ux433fa          | Model/Layout = m433ia   | Model/Layout = ux581l |
-| ![without % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-ZenBook-UX433FA.jpg)  |  ![with % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-VivoBook-M433IA.jpg) | ![model ux581](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/Asus-ZenBook-UX581l.jpg) |
+| ![without % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-ZenBook-UX433FA.jpg)  |  ![with % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-VivoBook-M433IA.jpg) | ![model ux581](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-ZenBook-UX581l.jpg) |
 
 This is a python service which enables switching between numpad and touchpad for the Asus UX433.
 It may work for other models.
@@ -34,6 +34,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UM325UA (with % and = symbols)
 - X412DA (without extra symbols)
 - UX581L (with % and = symbols)
+- Zephyrus S GX701 (with % and = symbols)
 
 Install required packages
 
@@ -75,10 +76,16 @@ sudo ./uninstall.sh
 
 **Troubleshooting**
 
+To activate logger, do in a console:
+```
+LOG=DEBUG sudo -E ./asus_touchpad.py
+```
+
 For some operating systems with boot failure (Pop!OS, Mint, ElementaryOS, SolusOS), before installing, please uncomment in the asus_touchpad.service file, this following property and adjust its value:
 ```
 # ExecStartPre=/bin/sleep 2
 ```
+
 
 It is an adaptation made thanks to:
  - solution published on reddit (https://www.reddit.com/r/linuxhardware/comments/f2vdad/a_service_handling_touchpad_numpad_switching_for/) 
