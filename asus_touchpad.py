@@ -7,8 +7,8 @@ import os
 import re
 import subprocess
 import sys
+import time
 from fcntl import F_SETFL, fcntl
-from time import sleep
 from typing import Optional
 
 import libevdev.const
@@ -93,7 +93,7 @@ while tries > 0:
     else:
         break
 
-    sleep(model_layout.try_sleep)
+    time.sleep(model_layout.try_sleep)
 
 # Start monitoring the touchpad
 
@@ -172,12 +172,13 @@ def deactivate_numlock():
 
 
 def launch_calculator():
+    log.debug('calculator')
     try:
         events = [
             InputEvent(calculator_key, 1),
             InputEvent(EV_SYN.SYN_REPORT, 0),
             InputEvent(calculator_key, 0),
-            InputEvent(EV_SYN.SYN_REPORT, 0)
+        InputEvent(EV_SYN.SYN_REPORT, 0)
         ]
         udev.send_events(events)
     except OSError as e:
@@ -195,8 +196,8 @@ def change_brightness(brightness):
 
 
 # Run - process and act on events
-
 numlock: bool = False
+calc: int = 0
 pos_x: int = 0
 pos_y: int = 0
 button_pressed: libevdev.const = None
@@ -228,8 +229,7 @@ while True:
 
         # If end of tap, send release key event #
         if e.value == 0:
-            log.debug('finger up at x %d y %d', x, y)
-
+            #log.debug('finger up at x %d y %d', x, y)
             if button_pressed:
                 log.debug('send key up event %s', button_pressed)
                 events = [
@@ -246,8 +246,7 @@ while True:
 
         elif e.value == 1 and not button_pressed:
             # Start of tap #
-            log.debug('finger down at x %d y %d', x, y)
-
+            #log.debug('finger down at x %d y %d', x, y)
             # Check if numlock was hit #
             if (x > 0.95 * maxx) and (y < 0.09 * maxy):
                 numlock = not numlock
@@ -255,13 +254,15 @@ while True:
                     activate_numlock(brightness)
                 else:
                     deactivate_numlock()
-
-            # Check if caclulator was hit #
+                # Check if caclulator was hit #
             elif (x < 0.06 * maxx) and (y < 0.07 * maxy):
                 if numlock:
                     brightness = change_brightness(brightness)
                 else:
-                    launch_calculator()
+                    calc +=1
+                    if (calc == 2):
+                        calc = 0
+                        launch_calculator()
                 continue
 
             # If touchpad mode, ignore #
@@ -300,4 +301,4 @@ while True:
                 udev.send_events(events)
             except OSError as err:
                 log.warning("Cannot send press event, %s", err)
-    sleep(0.1)
+    time.sleep(0.1)
