@@ -270,8 +270,10 @@ while True:
                 continue
 
             # else numpad mode is activated
-            col = math.floor(model_layout.cols * x / (maxx+1) )
+            col = math.floor(model_layout.cols * x / (maxx + 1) )
             row = math.floor((model_layout.rows * y / maxy) - model_layout.top_offset)
+            if row < 0:
+                continue
             try:
                 button_pressed = model_layout.keys[row][col]
             except IndexError:
