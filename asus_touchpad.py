@@ -255,6 +255,7 @@ while True:
                     activate_numlock(brightness)
                 else:
                     deactivate_numlock()
+                continue
 
             # Check if caclulator was hit #
             elif (x < 0.06 * maxx) and (y < 0.07 * maxy):
