@@ -171,8 +171,8 @@ def change_brightness(brightness):
 # Run - process and act on events
 
 numlock: bool = False
-pos_x: int = 0
-pos_y: int = 0
+x: int = 0
+y: int = 0
 button_pressed: libevdev.const = None
 brightness: int = 0
 
