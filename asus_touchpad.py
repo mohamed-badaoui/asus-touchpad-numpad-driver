@@ -118,8 +118,8 @@ if percentage_key != EV_KEY.KEY_5:
 udev = dev.create_uinput_device()
 
 
-# Brightness 0: Off, 31: Low, 24: Half, 1: Full
-BRIGHT_VAL = [hex(val) for val in [0, 31, 24, 1]]
+# Brightness 0: Off, 1...17 from low to high
+BRIGHT_VAL = ["0x0"] + [hex(val) for val in range(0x1f, 0xF, -1)]
 
 
 def activate_numlock(brightness):
@@ -170,6 +170,7 @@ x: int = 0
 y: int = 0
 button_pressed: libevdev.const = None
 brightness: int = 1
+numlock_press = False
 
 while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
@@ -186,6 +187,13 @@ while True:
         # Get x position #
         if e.matches(EV_ABS.ABS_MT_POSITION_X):
             x = e.value
+            # Pseudo-gesture to adjust brightness
+            if numlock_press and x < 0.95 * maxx:
+                new_brightness =  1 + int(x * (len(BRIGHT_VAL) - 1) / (0.95 * maxx))
+                if new_brightness != brightness:
+                    brightness = new_brightness
+                    log.debug("brightness change: %s", brightness)
+                    change_brightness(brightness)
             continue
 
         # Get y position #
@@ -198,6 +206,7 @@ while True:
         # If end of tap, send release key event #
         if e.value == 0:
             log.debug('finger up at x %d y %d', x, y)
+            numlock_press = False
 
             if button_pressed:
                 log.debug('send key up event %s', button_pressed)
@@ -221,6 +230,7 @@ while True:
             if (x > 0.95 * maxx) and (y < 0.09 * maxy):
                 numlock = not numlock
                 if numlock:
+                    numlock_press = True
                     activate_numlock(brightness)
                 else:
                     deactivate_numlock()
