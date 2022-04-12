@@ -33,7 +33,6 @@ model_layout = importlib.import_module('numpad_layouts.'+ model)
 # Figure out devices from devices file
 
 touchpad: Optional[str] = None
-keyboard: Optional[str] = None
 device_id: Optional[str] = None
 
 tries = model_layout.try_times
@@ -41,7 +40,6 @@ tries = model_layout.try_times
 # Look into the devices file #
 while tries > 0:
 
-    keyboard_detected = 0
     touchpad_detected = 0
 
     with open('/proc/bus/input/devices', 'r') as f:
@@ -64,31 +62,15 @@ while tries > 0:
                     touchpad_detected = 2
                     log.debug('Set touchpad id %s from %s', touchpad, line.strip())
 
-            # Look for the keyboard (numlock) # AT Translated Set OR Asus Keyboard
-            if keyboard_detected == 0 and ("Name=\"AT Translated Set 2 keyboard" in line or "Name=\"Asus Keyboard" in line):
-                keyboard_detected = 1
-                log.debug('Detect keyboard from %s', line.strip())
 
-            if keyboard_detected == 1:
-                if "H: " in line:
-                    keyboard = line.split("event")[1]
-                    keyboard = keyboard.split(" ")[0]
-                    keyboard_detected = 2
-                    log.debug('Set keyboard %s from %s', keyboard, line.strip())
-
-            # Stop looking if both have been found #
-            if keyboard_detected == 2 and touchpad_detected == 2:
+            # Stop looking if touchpad has been found #
+            if touchpad_detected == 2:
                 break
 
-    if keyboard_detected != 2 or touchpad_detected != 2:
+    if touchpad_detected != 2:
         tries -= 1
         if tries == 0:
-            if keyboard_detected != 2:
-                log.error("Can't find keyboard (code: %s)", keyboard_detected)
-            if touchpad_detected != 2:
-                log.error("Can't find touchpad (code: %s)", touchpad_detected)
-            if touchpad_detected == 2 and not device_id.isnumeric():
-                log.error("Can't find device id")
+            log.error("Can't find touchpad (code: %s)", touchpad_detected)
             sys.exit(1)
     else:
         break
@@ -108,13 +90,6 @@ ai = d_t.absinfo[EV_ABS.ABS_X]
 ai = d_t.absinfo[EV_ABS.ABS_Y]
 (miny, maxy) = (ai.minimum, ai.maximum)
 log.debug('Touchpad min-max: x %d-%d, y %d-%d', minx, maxx, miny, maxy)
-
-
-# Start monitoring the keyboard (numlock)
-
-fd_k = open('/dev/input/event' + str(keyboard), 'rb')
-fcntl(fd_k, F_SETFL, os.O_NONBLOCK)
-d_k = Device(fd_k)
 
 
 # Create a new keyboard device to send numpad events
