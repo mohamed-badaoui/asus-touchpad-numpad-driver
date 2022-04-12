@@ -118,31 +118,28 @@ if percentage_key != EV_KEY.KEY_5:
 udev = dev.create_uinput_device()
 
 
-# Brightness 31: Low, 24: Half, 1: Full
-
-BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
+# Brightness 0: Off, 31: Low, 24: Half, 1: Full
+BRIGHT_VAL = [hex(val) for val in [0, 31, 24, 1]]
 
 
 def activate_numlock(brightness):
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    change_brightness(brightness)
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
     ]
     udev.send_events(events)
     d_t.grab()
-    subprocess.call(numpad_cmd, shell=True)
 
 
 def deactivate_numlock():
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    change_brightness(0)
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 0),
         InputEvent(EV_SYN.SYN_REPORT, 0)
     ]
     udev.send_events(events)
     d_t.ungrab()
-    subprocess.call(numpad_cmd, shell=True)
 
 
 def launch_calculator():
@@ -158,13 +155,11 @@ def launch_calculator():
         pass
 
 
-# status 1 = min bright
-# status 2 = middle bright
-# status 3 = max bright
+# brightness values: 0 off, 1 min, 2 medium, 3 max
 def change_brightness(brightness):
-    brightness = (brightness + 1) % len(BRIGHT_VAL)
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
-    subprocess.call(numpad_cmd, shell=True)
+    brightness = brightness % len(BRIGHT_VAL)
+    numpad_cmd = ["i2ctransfer", "-f", "-y ", device_id, "w13@0x15", "0x05", "0x00", "0x3d", "0x03", "0x06", "0x00", "0x07", "0x00", "0x0d", "0x14", "0x03", BRIGHT_VAL[brightness], "0xad"]
+    subprocess.call(numpad_cmd)
     return brightness
 
 
@@ -174,7 +169,7 @@ numlock: bool = False
 x: int = 0
 y: int = 0
 button_pressed: libevdev.const = None
-brightness: int = 0
+brightness: int = 1
 
 while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
@@ -234,7 +229,7 @@ while True:
             # Check if caclulator was hit #
             elif (x < 0.06 * maxx) and (y < 0.07 * maxy):
                 if numlock:
-                    brightness = change_brightness(brightness)
+                    change_brightness(brightness)
                 else:
                     launch_calculator()
                 continue
