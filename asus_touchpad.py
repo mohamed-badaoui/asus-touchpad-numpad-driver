@@ -98,7 +98,6 @@ while tries > 0:
 # Start monitoring the touchpad
 
 fd_t = open('/dev/input/event' + str(touchpad), 'rb')
-fcntl(fd_t, F_SETFL, os.O_NONBLOCK)
 d_t = Device(fd_t)
 
 
@@ -304,4 +303,3 @@ while True:
                 udev.send_events(events)
             except OSError as err:
                 log.warning("Cannot send press event, %s", err)
-    sleep(0.1)
