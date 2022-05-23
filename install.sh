@@ -24,7 +24,7 @@ then
 	exit 1
 fi
 
-interfaces=$(for i in $(i2cdetect -l | grep DesignWare | sed -r "s/^(i2c\-[0-9]+).*/\1/"); do echo $i; done)
+interfaces=$(for i in $(i2cdetect -l | grep DesignWare | sed -r "s/^(i2c\-[0-9]+).*/\1/"); do echo "$i"; done)
 if [ -z "$interfaces" ]
 then
     echo "No interface i2c found. Make sure you have installed libevdev packages"
@@ -34,7 +34,7 @@ fi
 touchpad_detected=false;
 for i in $interfaces; do
     echo -n "Testing interface $i : ";
-    number=$(echo -n $i | cut -d'-' -f2)
+    number=$(echo -n "$i" | cut -d'-' -f2)
 	offTouchpadCmd="i2ctransfer -f -y $number w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
     i2c_test=$($offTouchpadCmd 2>&1)
     if [ -z "$i2c_test" ]
