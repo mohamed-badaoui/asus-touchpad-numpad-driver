@@ -42,11 +42,4 @@ then
 	# exit 1
 fi
 
-rm -rf /var/log/asus_touchpad_numpad-driver
-if [[ $? != 0 ]]
-then
-	echo "/var/log/asus_touchpad_numpad-driver cannot be removed correctly..."
-	# exit 1
-fi
-
 echo "Asus touchpad python driver uninstalled"

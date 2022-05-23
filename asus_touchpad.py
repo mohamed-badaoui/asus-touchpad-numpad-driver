@@ -99,6 +99,7 @@ while tries > 0:
 
     sleep(model_layout.try_sleep)
 
+
 # Start monitoring the touchpad
 
 try:

@@ -115,7 +115,6 @@ echo "Add asus touchpad service in /etc/systemd/system/"
 cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /etc/systemd/system/asus_touchpad_numpad.service
 
 mkdir -p /usr/share/asus_touchpad_numpad-driver/numpad_layouts
-mkdir -p /var/log/asus_touchpad_numpad-driver
 install asus_touchpad.py /usr/share/asus_touchpad_numpad-driver/
 install -t /usr/share/asus_touchpad_numpad-driver/numpad_layouts numpad_layouts/*.py
 
