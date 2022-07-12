@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import importlib
 import logging
@@ -255,6 +255,9 @@ while True:
                 else:
                     deactivate_numlock()
                 # Check if caclulator was hit #
+                continue
+
+            # Check if caclulator was hit #
             elif (x < 0.06 * maxx) and (y < 0.07 * maxy):
                 if numlock:
                     brightness = change_brightness(brightness)
@@ -272,6 +275,7 @@ while True:
             # else numpad mode is activated
             col = math.floor(model_layout.cols * x / (maxx + 1) )
             row = math.floor((model_layout.rows * y / maxy) - model_layout.top_offset)
+            # Ignore top_offset region #
             if row < 0:
                 continue
             try:
@@ -280,7 +284,6 @@ while True:
                 # skip invalid row and col values
                 log.debug('Unhandled col/row %d/%d for position %d-%d', col, row, x, y)
                 continue
-            
             if button_pressed == EV_KEY.KEY_5:
                 button_pressed = percentage_key
 

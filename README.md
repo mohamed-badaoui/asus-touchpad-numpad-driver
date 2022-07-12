@@ -5,8 +5,7 @@
 | Model/Layout = ux433fa          | Model/Layout = m433ia   | Model/Layout = ux581l |
 | ![without % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-ZenBook-UX433FA.jpg)  |  ![with % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-VivoBook-M433IA.jpg) | ![model ux581](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-ZenBook-UX581l.jpg) |
 
-This is a python service which enables switching between numpad and touchpad for the Asus UX433.
-It may work for other models.
+This is a python service which enables switching between numpad and touchpad for the Asus UX433. It may work for other models. When running the script, use as an argument one of the strings `ux433fa` or `m433ia` or `ux581l to select the layout that fits your touchpad. You can inspect the different layouts [here](https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver/tree/main/numpad_layouts).
 
 This python driver has been tested and works fine for these asus versions at the moment:
 - M433IA (with % and = symbols)
@@ -14,7 +13,9 @@ This python driver has been tested and works fine for these asus versions at the
 - ROG Strix G15 2021 
 - S413DA (with % and = symbols)
 - TM420 (with % and = symbols)
+- UM425I (with % and = symbols)
 - UM425IA (with % and = symbols)
+- UM425UA (with % and = symbols)
 - UM431DA (without extra symbols)
 - UM433DA (with % and = symbols)
 - UX425EA (with % and = symbols)
@@ -22,6 +23,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UX434FA (with % and = symbols)
 - UX463FL (with % and = symbols)
 - UX463FA (with % and = symbols)
+- UM462DA (without extra symbols)
 - UX433 (without extra symbols)
 - UX431F (without extra symbols)
 - UX393 (with % and = symbols)
@@ -51,6 +53,40 @@ sudo pacman -S libevdev python-libevdev i2c-tools git
 - Fedora:
 ```
 sudo dnf install libevdev python-libevdev i2c-tools git
+```
+
+- NixOS:
+
+Add these to your `/etc/nixos/configuration.nix`:
+
+```nix
+# i2c for https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver
+hardware.i2c.enable = true;
+systemd.services.asus-touchpad-numpad = {
+  description = "Activate Numpad inside the touchpad with top right corner switch";
+  documentation = ["https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver"];
+  path = [ pkgs.i2c-tools ];
+  script = ''
+    cd ${pkgs.fetchFromGitHub {
+      owner = "mohamed-badaoui";
+      repo = "asus-touchpad-numpad-driver";
+      # These needs to be updated from time to time
+      rev = "d80980af6ef776ee6acf42c193689f207caa7968";
+      sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    }}
+    # In the last argument here you choose your layout.
+    ${pkgs.python3.withPackages(ps: [ ps.libevdev ])}/bin/python asus_touchpad.py ux433fa
+  '';
+  # Probably needed because it fails on boot seemingly because the driver
+  # is not ready yet. Alternativly, you can use `sleep 3` or similar in the
+  # `script`.
+  serviceConfig = {
+    RestartSec = "1s";
+    Restart = "on-failure";
+  };
+  wantedBy = [ "multi-user.target" ];
+};
+
 ```
 
 Then enable i2c
