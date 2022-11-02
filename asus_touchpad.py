@@ -150,7 +150,7 @@ BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
 
 
 def activate_numlock(brightness):
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {BRIGHT_VAL[brightness]} 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -161,7 +161,7 @@ def activate_numlock(brightness):
 
 
 def deactivate_numlock():
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 0),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -190,7 +190,7 @@ def launch_calculator():
 # status 3 = max bright
 def change_brightness(brightness):
     brightness = (brightness + 1) % len(BRIGHT_VAL)
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {BRIGHT_VAL[brightness]} 0xad"
     subprocess.call(numpad_cmd, shell=True)
     return brightness
 
@@ -261,6 +261,9 @@ while True:
             elif (x < 0.06 * maxx) and (y < 0.07 * maxy):
                 if numlock:
                     brightness = change_brightness(brightness)
+                    log.debug("brightness changed to %d", brightness)
+                else:
+                    launch_calculator()
                 continue
 
             # If touchpad mode, ignore #
