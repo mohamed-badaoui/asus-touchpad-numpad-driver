@@ -8,6 +8,7 @@
 This is a python service which enables switching between numpad and touchpad for the Asus UX433. It may work for other models. When running the script, use as an argument one of the strings `ux433fa` or `m433ia` or `ux581l to select the layout that fits your touchpad. You can inspect the different layouts [here](https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver/tree/main/numpad_layouts).
 
 This python driver has been tested and works fine for these asus versions at the moment:
+- E210MA (with % and = symbols)
 - M433IA (with % and = symbols)
 - R424DA (without extra symbols)
 - ROG Strix G15 2021 
