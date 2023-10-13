@@ -21,7 +21,6 @@ logging.basicConfig()
 log = logging.getLogger('Pad')
 log.setLevel(os.environ.get('LOG', 'INFO'))
 
-
 # Select model from command line
 
 model = 'm433ia' # Model used in the derived script (with symbols)
@@ -37,6 +36,10 @@ keyboard: Optional[str] = None
 device_id: Optional[str] = None
 
 tries = model_layout.try_times
+
+# Import brightness levels and init codes from layout file
+brightness_levels = model_layout.brightness_levels
+brightness_init = model_layout.brightness_init
 
 # Look into the devices file #
 while tries > 0:
@@ -143,25 +146,29 @@ if percentage_key != EV_KEY.KEY_5:
 
 udev = dev.create_uinput_device()
 
-
-# Brightness 31: Low, 24: Half, 1: Full
-
-BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
+# All codes already in hex
+BRIGHT_VAL = [val for val in brightness_levels]
 
 
 def activate_numlock(brightness):
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    numpad_cmd= f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {BRIGHT_VAL[brightness]} 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
     ]
     udev.send_events(events)
     d_t.grab()
+    # If layout has codes then execute if first
+    if len(brightness_init) > 0:
+        for codes in brightness_init:
+            numpad_cmd_init = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {codes} 0xad"
+            subprocess.call(numpad_cmd_init, shell=True)
     subprocess.call(numpad_cmd, shell=True)
+    print(f"Execute on: {numpad_cmd}")
 
 
 def deactivate_numlock():
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 0),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -169,7 +176,6 @@ def deactivate_numlock():
     udev.send_events(events)
     d_t.ungrab()
     subprocess.call(numpad_cmd, shell=True)
-
 
 def launch_calculator():
     try:
@@ -184,13 +190,20 @@ def launch_calculator():
         pass
 
 
-# status 1 = min bright
-# status 2 = middle bright
-# status 3 = max bright
 def change_brightness(brightness):
-    brightness = (brightness + 1) % len(BRIGHT_VAL)
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    # If 4th argument is True then inverse change_brightness cycle
+    if len(sys.argv) > 4:
+        if bool(sys.argv[4]): brightness = (brightness - 1) % len(BRIGHT_VAL)
+        else: brightness = (brightness + 1) % len(BRIGHT_VAL)
+    else: brightness = (brightness + 1) % len(BRIGHT_VAL)
+    numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {BRIGHT_VAL[brightness]} 0xad"
+    # If layout has codes then execute if first
+    if len(brightness_init) > 0:
+        for codes in brightness_init:
+            numpad_cmd_init = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {codes} 0xad"
+            subprocess.call(numpad_cmd_init, shell=True)
     subprocess.call(numpad_cmd, shell=True)
+    print(f"Execute brightness: {numpad_cmd}")
     return brightness
 
 
@@ -200,7 +213,14 @@ numlock: bool = False
 pos_x: int = 0
 pos_y: int = 0
 button_pressed: libevdev.const = None
-brightness: int = 0
+# 3rd argument containt defautl brightness level, if argument not set - use max level from layout file
+if len(sys.argv) > 3:
+    if int(sys.argv[3]) > len(model_layout.brightness_levels) - 1:
+        brightness: int = len(model_layout.brightness_levels) - 1
+    else:
+        brightness: int = int(sys.argv[3])
+else:
+    brightness: int = len(model_layout.brightness_levels) - 1
 
 while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
