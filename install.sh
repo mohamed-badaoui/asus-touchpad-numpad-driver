@@ -80,6 +80,10 @@ do
             model=ux581l
             break
             ;;
+        "um3402ya" )
+            model=um3402ya
+            break
+            ;;
         "Q")
             exit 0
             ;;
@@ -110,9 +114,80 @@ do
     esac
 done
 
+echo
+echo "Select default brightness level:"
+PS3='Please enter your choice [1-4]: '
+options=("Low" "Medium" "High" "Quit")
+if [ "$model" != "um3402ya" ]; then
+	select opt in "${options[@]}"
+	do
+	    case $opt in
+	        "Low")
+	            default_level=0
+	     	    break
+	            ;;
+	        "Medium")
+	            default_level=1
+	            break
+	            ;;
+	        "High")
+	            default_level=2
+	            break
+	            ;;
+	        "Quit")
+	            exit 0
+	            ;;
+	        *) echo "invalid option $REPLY";;
+	    esac
+	done
+else
+	select opt in "${options[@]}"
+	do
+	    case $opt in
+	        "Low")
+	            default_level=1
+	     	    break
+	            ;;
+	        "Medium")
+	            default_level=4
+	            break
+	            ;;
+	        "High")
+	            default_level=8
+	            break
+	            ;;
+	        "Quit")
+	            exit 0
+	            ;;
+	        *) echo "invalid option $REPLY";;
+	    esac
+	done
+fi
+
+echo
+echo "How to change brightness?"
+PS3='Please enter your choice [1-3]: '
+options=("From low to high" "From high to low" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "From low to high")
+            invert_cycle="False"
+            break
+            ;;
+        "From high to low")
+            invert_cycle="True"
+            break
+            ;;
+        "Quit")
+            exit 0
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
 
 echo "Add asus touchpad service in /etc/systemd/system/"
-cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /etc/systemd/system/asus_touchpad_numpad.service
+cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY $DEFAULT_LEVEL $INVERT_BRIGHTNESS_CYCLE' > /etc/systemd/system/asus_touchpad_numpad.service
 
 mkdir -p /usr/share/asus_touchpad_numpad-driver/numpad_layouts
 mkdir -p /var/log/asus_touchpad_numpad-driver
