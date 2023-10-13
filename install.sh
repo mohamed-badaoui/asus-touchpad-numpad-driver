@@ -187,7 +187,7 @@ do
 done
 
 echo "Add asus touchpad service in /etc/systemd/system/"
-cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY $DEFAULT_LEVEL $INVERT_BRIGHTNESS_CYCLE' > /etc/systemd/system/asus_touchpad_numpad.service
+cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key DEFAULT_LEVEL=$default_level INVERT_BRIGHTNESS_CYCLE=$invert_cycle envsubst '$LAYOUT $PERCENTAGE_KEY $DEFAULT_LEVEL $INVERT_BRIGHTNESS_CYCLE' > /etc/systemd/system/asus_touchpad_numpad.service
 
 mkdir -p /usr/share/asus_touchpad_numpad-driver/numpad_layouts
 mkdir -p /var/log/asus_touchpad_numpad-driver
