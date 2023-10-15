@@ -164,8 +164,6 @@ def activate_numlock(brightness):
             numpad_cmd_init = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {codes} 0xad"
             subprocess.call(numpad_cmd_init, shell=True)
     subprocess.call(numpad_cmd, shell=True)
-    print(f"Execute on: {numpad_cmd}")
-
 
 def deactivate_numlock():
     numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
@@ -203,7 +201,6 @@ def change_brightness(brightness):
             numpad_cmd_init = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {codes} 0xad"
             subprocess.call(numpad_cmd_init, shell=True)
     subprocess.call(numpad_cmd, shell=True)
-    print(f"Execute brightness: {numpad_cmd}")
     return brightness
 
 
