@@ -191,7 +191,7 @@ def launch_calculator():
 def change_brightness(brightness):
     # If 4th argument is True then inverse change_brightness cycle
     if len(sys.argv) > 4:
-        if bool(sys.argv[4]): brightness = (brightness - 1) % len(BRIGHT_VAL)
+        if sys.argv[4] == True: brightness = (brightness - 1) % len(BRIGHT_VAL)
         else: brightness = (brightness + 1) % len(BRIGHT_VAL)
     else: brightness = (brightness + 1) % len(BRIGHT_VAL)
     numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {BRIGHT_VAL[brightness]} 0xad"
