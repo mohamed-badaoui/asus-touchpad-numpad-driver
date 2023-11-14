@@ -8,8 +8,8 @@ cols = 5
 rows = 4
 top_offset = 0.3
 
-brightness_levels = ["0x01", "0x18", "0x1f"]
-brightness_init = []
+brightness_levels = ["0x00", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48"]
+brightness_init = ["0x60", "0x01"]
 
 keys = [
     [EV_KEY.KEY_KP7, EV_KEY.KEY_KP8, EV_KEY.KEY_KP9, EV_KEY.KEY_KPSLASH, EV_KEY.KEY_BACKSPACE],

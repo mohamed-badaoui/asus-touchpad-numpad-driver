@@ -9,6 +9,9 @@ rows = 5 # Compared to the more "horizontal" version of the UM433DA (for example
 # Subtract 0.3 (a third key) as the UX581L has about a third key space at the top
 top_offset = 0.3
 
+brightness_levels = ["0x01", "0x18", "0x1f"]
+brightness_init = []
+
 keys = [
     [EV_KEY.KEY_KPEQUAL, EV_KEY.KEY_5, EV_KEY.KEY_BACKSPACE, EV_KEY.KEY_BACKSPACE],
     [EV_KEY.KEY_KP7, EV_KEY.KEY_KP8, EV_KEY.KEY_KP9, EV_KEY.KEY_KPSLASH],
