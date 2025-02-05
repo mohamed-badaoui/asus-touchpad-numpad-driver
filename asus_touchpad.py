@@ -7,8 +7,8 @@ import os
 import re
 import subprocess
 import sys
+import time
 from fcntl import F_SETFL, fcntl
-from time import sleep
 from typing import Optional
 
 import libevdev.const
@@ -93,7 +93,7 @@ while tries > 0:
     else:
         break
 
-    sleep(model_layout.try_sleep)
+    time.sleep(model_layout.try_sleep)
 
 # Start monitoring the touchpad
 
@@ -150,7 +150,7 @@ BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
 
 
 def activate_numlock(brightness):
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {BRIGHT_VAL[brightness]} 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -161,7 +161,7 @@ def activate_numlock(brightness):
 
 
 def deactivate_numlock():
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 0),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -172,12 +172,13 @@ def deactivate_numlock():
 
 
 def launch_calculator():
+    log.debug('calculator')
     try:
         events = [
             InputEvent(calculator_key, 1),
             InputEvent(EV_SYN.SYN_REPORT, 0),
             InputEvent(calculator_key, 0),
-            InputEvent(EV_SYN.SYN_REPORT, 0)
+        InputEvent(EV_SYN.SYN_REPORT, 0)
         ]
         udev.send_events(events)
     except OSError as e:
@@ -189,14 +190,14 @@ def launch_calculator():
 # status 3 = max bright
 def change_brightness(brightness):
     brightness = (brightness + 1) % len(BRIGHT_VAL)
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    numpad_cmd = f"i2ctransfer -f -y {device_id} w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 {BRIGHT_VAL[brightness]} 0xad"
     subprocess.call(numpad_cmd, shell=True)
     return brightness
 
 
 # Run - process and act on events
-
 numlock: bool = False
+calc: int = 0
 pos_x: int = 0
 pos_y: int = 0
 button_pressed: libevdev.const = None
@@ -228,8 +229,7 @@ while True:
 
         # If end of tap, send release key event #
         if e.value == 0:
-            log.debug('finger up at x %d y %d', x, y)
-
+            #log.debug('finger up at x %d y %d', x, y)
             if button_pressed:
                 log.debug('send key up event %s', button_pressed)
                 events = [
@@ -246,8 +246,7 @@ while True:
 
         elif e.value == 1 and not button_pressed:
             # Start of tap #
-            log.debug('finger down at x %d y %d', x, y)
-
+            #log.debug('finger down at x %d y %d', x, y)
             # Check if numlock was hit #
             if (x > 0.95 * maxx) and (y < 0.09 * maxy):
                 numlock = not numlock
@@ -255,12 +254,14 @@ while True:
                     activate_numlock(brightness)
                 else:
                     deactivate_numlock()
+                # Check if caclulator was hit #
                 continue
 
             # Check if caclulator was hit #
             elif (x < 0.06 * maxx) and (y < 0.07 * maxy):
                 if numlock:
                     brightness = change_brightness(brightness)
+                    log.debug("brightness changed to %d", brightness)
                 else:
                     launch_calculator()
                 continue
@@ -270,7 +271,7 @@ while True:
                 continue
 
             # else numpad mode is activated
-            col = math.floor(model_layout.cols * x / (maxx+1) )
+            col = math.floor(model_layout.cols * x / (maxx + 1) )
             row = math.floor((model_layout.rows * y / maxy) - model_layout.top_offset)
             # Ignore top_offset region #
             if row < 0:
@@ -281,7 +282,6 @@ while True:
                 # skip invalid row and col values
                 log.debug('Unhandled col/row %d/%d for position %d-%d', col, row, x, y)
                 continue
-            
             if button_pressed == EV_KEY.KEY_5:
                 button_pressed = percentage_key
 
@@ -304,4 +304,4 @@ while True:
                 udev.send_events(events)
             except OSError as err:
                 log.warning("Cannot send press event, %s", err)
-    sleep(0.1)
+    time.sleep(0.1)

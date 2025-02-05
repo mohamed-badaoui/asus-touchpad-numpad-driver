@@ -3,8 +3,8 @@
 # Checking if the script is runned as root (via sudo or other)
 if [[ $(id -u) != 0 ]]
 then
-	echo "Please run the installation script as root (using sudo for example)"
-	exit 1
+    echo "Please run the installation script as root (using sudo for example)"
+    exit 1
 fi
 
 if [[ $(sudo apt install 2>/dev/null) ]]; then
@@ -20,8 +20,8 @@ modprobe i2c-dev
 # Checking if the i2c-dev module is successfuly loaded
 if [[ $? != 0 ]]
 then
-	echo "i2c-dev module cannot be loaded correctly. Make sur you have installed i2c-tools package"
-	exit 1
+    echo "i2c-dev module cannot be loaded correctly. Make sur you have installed i2c-tools package"
+    exit 1
 fi
 
 interfaces=$(for i in $(i2cdetect -l | grep DesignWare | sed -r "s/^(i2c\-[0-9]+).*/\1/"); do echo $i; done)
@@ -35,7 +35,7 @@ touchpad_detected=false;
 for i in $interfaces; do
     echo -n "Testing interface $i : ";
     number=$(echo -n $i | cut -d'-' -f2)
-	offTouchpadCmd="i2ctransfer -f -y $number w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    offTouchpadCmd="i2ctransfer -f -y $number w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
     i2c_test=$($offTouchpadCmd 2>&1)
     if [ -z "$i2c_test" ]
     then
@@ -112,7 +112,7 @@ done
 
 
 echo "Add asus touchpad service in /etc/systemd/system/"
-cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /etc/systemd/system/asus_touchpad_numpad.service
+cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /etc/systemd/system/asus_touchpad_numpad.service && chmod 644 /etc/systemd/system/asus_touchpad_numpad.service
 
 mkdir -p /usr/share/asus_touchpad_numpad-driver/numpad_layouts
 mkdir -p /var/log/asus_touchpad_numpad-driver
@@ -121,24 +121,24 @@ install -t /usr/share/asus_touchpad_numpad-driver/numpad_layouts numpad_layouts/
 
 echo "i2c-dev" | tee /etc/modules-load.d/i2c-dev.conf >/dev/null
 
+sudo systemctl daemon-reload
 systemctl enable asus_touchpad_numpad
 
 if [[ $? != 0 ]]
 then
-	echo "Something gone wrong while enabling asus_touchpad_numpad.service"
-	exit 1
+    echo "Something gone wrong while enabling asus_touchpad_numpad.service"
+    exit 1
 else
-	echo "Asus touchpad service enabled"
+    echo "Asus touchpad service enabled"
 fi
 
 systemctl restart asus_touchpad_numpad
 if [[ $? != 0 ]]
 then
-	echo "Something gone wrong while enabling asus_touchpad_numpad.service"
-	exit 1
+    echo "Something gone wrong while enabling asus_touchpad_numpad.service"
+    exit 1
 else
-	echo "Asus touchpad service started"
+    echo "Asus touchpad service started"
 fi
 
 exit 0
-
