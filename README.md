@@ -112,6 +112,9 @@ To uninstall, just run:
 sudo ./uninstall.sh
 ```
 
+**Tips**
+You can adjust brightness by dragging horizontally from the top right corner.
+
 **Troubleshooting**
 
 To activate logger, do in a console:
