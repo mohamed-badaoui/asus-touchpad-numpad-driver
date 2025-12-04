@@ -32,15 +32,28 @@ then
 fi
 
 touchpad_detected=false;
+i2c_addr=""
 for i in $interfaces; do
     echo -n "Testing interface $i : ";
     number=$(echo -n $i | cut -d'-' -f2)
-	offTouchpadCmd="i2ctransfer -f -y $number w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    # Try standard address 0x15 first
+    offTouchpadCmd="i2ctransfer -f -y $number w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
     i2c_test=$($offTouchpadCmd 2>&1)
     if [ -z "$i2c_test" ]
     then
-        echo "sucess"
+        echo "success (0x15)"
         touchpad_detected=true;
+        i2c_addr="0x15"
+        break
+    fi
+    # Try ROG/ASUF address 0x38
+    offTouchpadCmd="i2ctransfer -f -y $number w13@0x38 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    i2c_test=$($offTouchpadCmd 2>&1)
+    if [ -z "$i2c_test" ]
+    then
+        echo "success (0x38 - ROG)"
+        touchpad_detected=true;
+        i2c_addr="0x38"
         break
     else
         echo "failed"
@@ -64,6 +77,10 @@ select opt in "${options[@]}"
 do
     opt=${opt::-3}
     case $opt in
+        "g634jy")
+            model=g634jy
+            break
+            ;;
         "gx701" )
             model=gx701
             break
