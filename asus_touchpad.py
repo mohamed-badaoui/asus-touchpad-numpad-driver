@@ -48,7 +48,7 @@ while tries > 0:
         lines = f.readlines()
         for line in lines:
             # Look for the touchpad #
-            if touchpad_detected == 0 and ("Name=\"ASUE" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
+            if touchpad_detected == 0 and ("Name=\"ASUE" in line or "Name=\"ASUF" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
                 touchpad_detected = 1
                 log.debug('Detect touchpad from %s', line.strip())
 
@@ -94,6 +94,26 @@ while tries > 0:
         break
 
     sleep(model_layout.try_sleep)
+
+# Detect if ASUF device - these use I2C address 0x38 instead of 0x15
+is_asuf_device = False
+device_addr = "0x15"  # Default I2C address
+
+try:
+    with open('/proc/bus/input/devices', 'r') as f:
+        content = f.read()
+        # ASUF1416, ASUF1205, ASUF1204 devices use address 0x38
+        if 'Name="ASUF1416' in content or 'Name="ASUF1205' in content or 'Name="ASUF1204' in content:
+            is_asuf_device = True
+            device_addr = "0x38"
+            log.info('Detected ASUF device - using I2C address 0x38 for LED control')
+        elif 'Name="ASUF' in content and 'Touchpad' in content:
+            # Other ASUF devices - try 0x38 first as it's more common for newer devices
+            is_asuf_device = True
+            device_addr = "0x38"
+            log.info('Detected ASUF device - using I2C address 0x38 for LED control')
+except Exception as e:
+    log.warning(f'Error detecting ASUF device: {e}')
 
 # Start monitoring the touchpad
 
@@ -150,25 +170,34 @@ BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
 
 
 def activate_numlock(brightness):
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
     ]
     udev.send_events(events)
     d_t.grab()
-    subprocess.call(numpad_cmd, shell=True)
+
+    # Send I2C command to enable LED backlight
+    # ASUF devices (ASUF1416, ASUF1205, ASUF1204) use address 0x38, others use 0x15
+    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@" + device_addr + " 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    log.debug(f'LED command: {numpad_cmd}')
+    result = subprocess.call(numpad_cmd + " 2>/dev/null", shell=True)
+    if result != 0:
+        log.warning("LED control not available (i2c command failed). Numpad will work without backlight.")
 
 
 def deactivate_numlock():
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 0),
         InputEvent(EV_SYN.SYN_REPORT, 0)
     ]
     udev.send_events(events)
     d_t.ungrab()
-    subprocess.call(numpad_cmd, shell=True)
+
+    # Send I2C command to disable LED backlight
+    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@" + device_addr + " 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    log.debug(f'LED off command: {numpad_cmd}')
+    subprocess.call(numpad_cmd + " 2>/dev/null", shell=True)
 
 
 def launch_calculator():
@@ -189,8 +218,9 @@ def launch_calculator():
 # status 3 = max bright
 def change_brightness(brightness):
     brightness = (brightness + 1) % len(BRIGHT_VAL)
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
-    subprocess.call(numpad_cmd, shell=True)
+    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@" + device_addr + " 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    log.debug(f'Brightness command: {numpad_cmd}')
+    subprocess.call(numpad_cmd + " 2>/dev/null", shell=True)
     return brightness
 
 
@@ -200,7 +230,7 @@ numlock: bool = False
 pos_x: int = 0
 pos_y: int = 0
 button_pressed: libevdev.const = None
-brightness: int = 0
+brightness: int = 2  # Start at full brightness (index 2 = 0x01)
 
 while True:
     # If touchpad sends tap events, convert x/y position to numlock key and send it #
@@ -248,8 +278,8 @@ while True:
             # Start of tap #
             log.debug('finger down at x %d y %d', x, y)
 
-            # Check if numlock was hit #
-            if (x > 0.95 * maxx) and (y < 0.09 * maxy):
+            # Check if numlock was hit (top-right corner icon)
+            if (x > 0.80 * maxx) and (y < 0.25 * maxy):
                 numlock = not numlock
                 if numlock:
                     activate_numlock(brightness)
