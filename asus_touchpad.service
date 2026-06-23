@@ -4,7 +4,7 @@ Description=Asus Touchpad to Numpad Handler
 [Service]
 Type=simple
 ExecStart=/usr/share/asus_touchpad_numpad-driver/asus_touchpad.py $LAYOUT $PERCENTAGE_KEY
-StandardInput=tty-force
+StandardInput=null
 StandardOutput=/var/log/asus_touchpad_numpad-driver/error.log
 StandardError=/var/log/asus_touchpad_numpad-driver/error.log
 TimeoutSec=5

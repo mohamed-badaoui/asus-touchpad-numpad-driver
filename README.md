@@ -9,6 +9,7 @@ This is a python service which enables switching between numpad and touchpad for
 
 This python driver has been tested and works fine for these asus versions at the moment:
 - D413IA (with % and = symbols)
+- E210MA (with % and = symbols)
 - M433IA (with % and = symbols)
 - R424DA (without extra symbols)
 - ROG Strix G15 2021 
@@ -20,6 +21,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UM431DA (without extra symbols)
 - UM433DA (with % and = symbols)
 - UX425EA (with % and = symbols)
+- UX425E (with % and = symbols)
 - UX425JA (with % and = symbols)
 - UX434FA (with % and = symbols)
 - UX463FL (with % and = symbols)
@@ -33,11 +35,13 @@ This python driver has been tested and works fine for these asus versions at the
 - UX363EA (with % and = symbols)
 - UX363JA (with % and = symbols)
 - UX333FA (without extra symbols)
+- UX3402ZA (with % and = symbols)
 - UX325EA (with % and = symbols)
 - UM325UA (with % and = symbols)
 - X412DA (without extra symbols)
 - UX581L (with % and = symbols)
 - Zephyrus S GX701 (with % and = symbols)
+- UX3405CA (with % and = symbols)
 
 Install required packages
 

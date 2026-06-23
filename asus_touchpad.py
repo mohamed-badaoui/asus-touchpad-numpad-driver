@@ -5,6 +5,7 @@ import logging
 import math
 import os
 import re
+import shutil
 import subprocess
 import sys
 from fcntl import F_SETFL, fcntl
@@ -48,7 +49,7 @@ while tries > 0:
         lines = f.readlines()
         for line in lines:
             # Look for the touchpad #
-            if touchpad_detected == 0 and ("Name=\"ASUE" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
+            if touchpad_detected == 0 and ("Name=\"ASUE" in line or "Name=\"ASUF" in line or "Name=\"ELAN" in line) and "Touchpad" in line:
                 touchpad_detected = 1
                 log.debug('Detect touchpad from %s', line.strip())
 
@@ -144,24 +145,34 @@ if percentage_key != EV_KEY.KEY_5:
 udev = dev.create_uinput_device()
 
 
-# Brightness 31: Low, 24: Half, 1: Full
+# Brightness configuration dynamically loaded from layout, fallback to old defaults
+try:
+    BRIGHT_VAL = [hex(val) for val in model_layout.brightness_levels]
+except AttributeError:
+    BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
 
-BRIGHT_VAL = [hex(val) for val in [31, 24, 1]]
-
+I2C_TRANSFER = shutil.which("i2ctransfer") or "i2ctransfer"
 
 def activate_numlock(brightness):
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    numpad_cmd = I2C_TRANSFER + " -f -y " + str(device_id) + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    log.debug("Activating numlock. COMMAND: %s", numpad_cmd)
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 1),
         InputEvent(EV_SYN.SYN_REPORT, 0)
     ]
     udev.send_events(events)
     d_t.grab()
-    subprocess.call(numpad_cmd, shell=True)
+    
+    try:
+        output = subprocess.check_output(numpad_cmd, shell=True, stderr=subprocess.STDOUT)
+        log.debug("i2ctransfer output: %s", output)
+    except subprocess.CalledProcessError as e:
+        log.error("i2ctransfer failed with code %d. Output: %s", e.returncode, e.output)
 
 
 def deactivate_numlock():
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    numpad_cmd = I2C_TRANSFER + " -f -y " + str(device_id) + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 0x00 0xad"
+    log.debug("Deactivating numlock. COMMAND: %s", numpad_cmd)
     events = [
         InputEvent(EV_KEY.KEY_NUMLOCK, 0),
         InputEvent(EV_SYN.SYN_REPORT, 0)
@@ -189,7 +200,7 @@ def launch_calculator():
 # status 3 = max bright
 def change_brightness(brightness):
     brightness = (brightness + 1) % len(BRIGHT_VAL)
-    numpad_cmd = "i2ctransfer -f -y " + device_id + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
+    numpad_cmd = I2C_TRANSFER + " -f -y " + str(device_id) + " w13@0x15 0x05 0x00 0x3d 0x03 0x06 0x00 0x07 0x00 0x0d 0x14 0x03 " + BRIGHT_VAL[brightness] + " 0xad"
     subprocess.call(numpad_cmd, shell=True)
     return brightness
 
