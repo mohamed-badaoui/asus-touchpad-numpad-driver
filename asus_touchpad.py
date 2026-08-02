@@ -133,7 +133,7 @@ if len(sys.argv) > 2:
 # KEY_KPDOT sends the locale's decimal separator (e.g. a comma on German
 # layouts). Set ASUS_TOUCHPAD_DECIMAL_KEY=period to send the regular "."
 # key (KEY_DOT) instead, which is layout-independent.
-FORCE_PERIOD_KEY: Optional[EV_KEY] = None
+FORCE_PERIOD_KEY = None
 if os.environ.get('ASUS_TOUCHPAD_DECIMAL_KEY', '').strip().lower() in ('period', 'dot', '.'):
     FORCE_PERIOD_KEY = EV_KEY.KEY_DOT
 
