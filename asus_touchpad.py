@@ -130,6 +130,13 @@ calculator_key = EV_KEY.KEY_CALC
 if len(sys.argv) > 2:
     percentage_key = EV_KEY.codes[int(sys.argv[2])]
 
+# KEY_KPDOT sends the locale's decimal separator (e.g. a comma on German
+# layouts). Set ASUS_TOUCHPAD_DECIMAL_KEY=period to send the regular "."
+# key (KEY_DOT) instead, which is layout-independent.
+FORCE_PERIOD_KEY: Optional[EV_KEY] = None
+if os.environ.get('ASUS_TOUCHPAD_DECIMAL_KEY', '').strip().lower() in ('period', 'dot', '.'):
+    FORCE_PERIOD_KEY = EV_KEY.KEY_DOT
+
 dev = Device()
 dev.name = "Asus Touchpad/Numpad"
 dev.enable(EV_KEY.KEY_LEFTSHIFT)
@@ -142,6 +149,9 @@ for col in model_layout.keys:
 
 if percentage_key != EV_KEY.KEY_5:
     dev.enable(percentage_key)
+
+if FORCE_PERIOD_KEY:
+    dev.enable(FORCE_PERIOD_KEY)
 
 udev = dev.create_uinput_device()
 
@@ -313,6 +323,9 @@ while True:
             
             if button_pressed == EV_KEY.KEY_5:
                 button_pressed = percentage_key
+
+            if button_pressed == EV_KEY.KEY_KPDOT and FORCE_PERIOD_KEY:
+                button_pressed = FORCE_PERIOD_KEY
 
             # Send press key event #
             log.debug('send press key event %s', button_pressed)

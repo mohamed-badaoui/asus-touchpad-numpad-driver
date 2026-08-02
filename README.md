@@ -127,6 +127,18 @@ ASUS_TOUCHPAD_TOPLEFT_CMD="flameshot gui" LOG=DEBUG sudo -E ./asus_touchpad.py u
 Leave the prompt blank to keep the calculator behavior. You can change it later by
 editing that line and running `sudo systemctl daemon-reload && sudo systemctl restart asus_touchpad_numpad`.
 
+**Numpad decimal key sends locale separator by default**
+
+`KEY_KPDOT` (the numpad decimal key) sends whatever your keyboard layout maps as the
+decimal separator - a comma on German layouts, for example. Set
+`ASUS_TOUCHPAD_DECIMAL_KEY=period` to always send the regular `.` key instead:
+
+```
+ASUS_TOUCHPAD_DECIMAL_KEY=period LOG=DEBUG sudo -E ./asus_touchpad.py um5302l
+```
+
+`install.sh` will also ask about this and set it in the systemd unit.
+
 To uninstall, just run:
 ```
 sudo ./uninstall.sh
