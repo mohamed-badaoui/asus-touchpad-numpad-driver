@@ -88,6 +88,10 @@ do
             model=ux3405ca
             break
             ;;
+        "um5302l" )
+            model=um5302l
+            break
+            ;;
         "Q")
             exit 0
             ;;
@@ -119,8 +123,41 @@ do
 done
 
 
+echo
+echo "Command to run for the top-left touchpad corner (e.g. the share icon)."
+echo "Leave blank to keep the default (launches the calculator)."
+read -p 'Top-left command: ' topleft_cmd
+
+echo
+echo "Should the numpad decimal key always send '.' instead of your locale's"
+echo "decimal separator (e.g. ',' on German layouts)?"
+PS3='Please enter your choice [1-2]: '
+options=("No (use locale default)" "Yes (always send '.')")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "No (use locale default)")
+            decimal_key=
+            break
+            ;;
+        "Yes (always send '.')")
+            decimal_key=period
+            break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
 echo "Add asus touchpad service in /etc/systemd/system/"
-cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /etc/systemd/system/asus_touchpad_numpad.service
+cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key TOPLEFT_CMD="$topleft_cmd" DECIMAL_KEY="$decimal_key" envsubst '$LAYOUT $PERCENTAGE_KEY $TOPLEFT_CMD $DECIMAL_KEY' > /etc/systemd/system/asus_touchpad_numpad.service
+
+if [ -z "$topleft_cmd" ]; then
+    sed -i '/^Environment=ASUS_TOUCHPAD_TOPLEFT_CMD=/d' /etc/systemd/system/asus_touchpad_numpad.service
+fi
+
+if [ -z "$decimal_key" ]; then
+    sed -i '/^Environment=ASUS_TOUCHPAD_DECIMAL_KEY=/d' /etc/systemd/system/asus_touchpad_numpad.service
+fi
 
 mkdir -p /usr/share/asus_touchpad_numpad-driver/numpad_layouts
 mkdir -p /var/log/asus_touchpad_numpad-driver

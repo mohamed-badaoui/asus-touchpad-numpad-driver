@@ -5,6 +5,7 @@ import logging
 import math
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -129,6 +130,13 @@ calculator_key = EV_KEY.KEY_CALC
 if len(sys.argv) > 2:
     percentage_key = EV_KEY.codes[int(sys.argv[2])]
 
+# KEY_KPDOT sends the locale's decimal separator (e.g. a comma on German
+# layouts). Set ASUS_TOUCHPAD_DECIMAL_KEY=period to send the regular "."
+# key (KEY_DOT) instead, which is layout-independent.
+FORCE_PERIOD_KEY = None
+if os.environ.get('ASUS_TOUCHPAD_DECIMAL_KEY', '').strip().lower() in ('period', 'dot', '.'):
+    FORCE_PERIOD_KEY = EV_KEY.KEY_DOT
+
 dev = Device()
 dev.name = "Asus Touchpad/Numpad"
 dev.enable(EV_KEY.KEY_LEFTSHIFT)
@@ -141,6 +149,9 @@ for col in model_layout.keys:
 
 if percentage_key != EV_KEY.KEY_5:
     dev.enable(percentage_key)
+
+if FORCE_PERIOD_KEY:
+    dev.enable(FORCE_PERIOD_KEY)
 
 udev = dev.create_uinput_device()
 
@@ -193,6 +204,23 @@ def launch_calculator():
         udev.send_events(events)
     except OSError as e:
         pass
+
+
+# Top-left corner action outside numpad mode (e.g. the "share" icon on the
+# UM5302L). Configurable via ASUS_TOUCHPAD_TOPLEFT_CMD so a model whose
+# icon isn't a calculator can run any command instead. Falls back to the
+# original calculator shortcut when unset, so other layouts are unaffected.
+TOPLEFT_CMD = os.environ.get('ASUS_TOUCHPAD_TOPLEFT_CMD', '').strip()
+
+
+def run_top_left_action():
+    if not TOPLEFT_CMD:
+        launch_calculator()
+        return
+    try:
+        subprocess.Popen(shlex.split(TOPLEFT_CMD))
+    except (OSError, ValueError) as e:
+        log.error("Failed to run ASUS_TOUCHPAD_TOPLEFT_CMD %r: %s", TOPLEFT_CMD, e)
 
 
 # status 1 = min bright
@@ -273,7 +301,7 @@ while True:
                 if numlock:
                     brightness = change_brightness(brightness)
                 else:
-                    launch_calculator()
+                    run_top_left_action()
                 continue
 
             # If touchpad mode, ignore #
@@ -295,6 +323,9 @@ while True:
             
             if button_pressed == EV_KEY.KEY_5:
                 button_pressed = percentage_key
+
+            if button_pressed == EV_KEY.KEY_KPDOT and FORCE_PERIOD_KEY:
+                button_pressed = FORCE_PERIOD_KEY
 
             # Send press key event #
             log.debug('send press key event %s', button_pressed)

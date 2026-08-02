@@ -3,6 +3,8 @@ Description=Asus Touchpad to Numpad Handler
 
 [Service]
 Type=simple
+Environment=ASUS_TOUCHPAD_TOPLEFT_CMD=$TOPLEFT_CMD
+Environment=ASUS_TOUCHPAD_DECIMAL_KEY=$DECIMAL_KEY
 ExecStart=/usr/share/asus_touchpad_numpad-driver/asus_touchpad.py $LAYOUT $PERCENTAGE_KEY
 StandardInput=null
 StandardOutput=/var/log/asus_touchpad_numpad-driver/error.log
