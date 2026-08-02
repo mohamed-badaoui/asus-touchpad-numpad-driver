@@ -5,6 +5,7 @@ import logging
 import math
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -195,6 +196,23 @@ def launch_calculator():
         pass
 
 
+# Top-left corner action outside numpad mode (e.g. the "share" icon on the
+# UM5302L). Configurable via ASUS_TOUCHPAD_TOPLEFT_CMD so a model whose
+# icon isn't a calculator can run any command instead. Falls back to the
+# original calculator shortcut when unset, so other layouts are unaffected.
+TOPLEFT_CMD = os.environ.get('ASUS_TOUCHPAD_TOPLEFT_CMD', '').strip()
+
+
+def run_top_left_action():
+    if not TOPLEFT_CMD:
+        launch_calculator()
+        return
+    try:
+        subprocess.Popen(shlex.split(TOPLEFT_CMD))
+    except (OSError, ValueError) as e:
+        log.error("Failed to run ASUS_TOUCHPAD_TOPLEFT_CMD %r: %s", TOPLEFT_CMD, e)
+
+
 # status 1 = min bright
 # status 2 = middle bright
 # status 3 = max bright
@@ -273,7 +291,7 @@ while True:
                 if numlock:
                     brightness = change_brightness(brightness)
                 else:
-                    launch_calculator()
+                    run_top_left_action()
                 continue
 
             # If touchpad mode, ignore #

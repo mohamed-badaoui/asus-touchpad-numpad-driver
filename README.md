@@ -42,6 +42,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UX581L (with % and = symbols)
 - Zephyrus S GX701 (with % and = symbols)
 - UX3405CA (with % and = symbols)
+- UM5302L / Zenbook S 13 OLED (with % and = symbols, top-left is a "share" icon, see below)
 
 Install required packages
 
@@ -109,6 +110,22 @@ sudo ./install.sh
 
 To turn on/off numpad, tap top right corner touchpad area.
 To adjust numpad brightness, tap top left corner touchpad area.
+
+**Top-left corner action (e.g. the "share" icon on the UM5302L)**
+
+Outside numpad mode, tapping the top-left corner launches the calculator by default.
+On models like the UM5302L this corner is a "share" icon instead, so you can override
+the action with the `ASUS_TOUCHPAD_TOPLEFT_CMD` environment variable, set to any shell
+command:
+
+```
+ASUS_TOUCHPAD_TOPLEFT_CMD="flameshot gui" LOG=DEBUG sudo -E ./asus_touchpad.py um5302l
+```
+
+`install.sh` will prompt for this command and store it in the generated systemd unit
+(`/etc/systemd/system/asus_touchpad_numpad.service`) as `Environment=ASUS_TOUCHPAD_TOPLEFT_CMD=...`.
+Leave the prompt blank to keep the calculator behavior. You can change it later by
+editing that line and running `sudo systemctl daemon-reload && sudo systemctl restart asus_touchpad_numpad`.
 
 To uninstall, just run:
 ```

@@ -88,6 +88,10 @@ do
             model=ux3405ca
             break
             ;;
+        "um5302l" )
+            model=um5302l
+            break
+            ;;
         "Q")
             exit 0
             ;;
@@ -119,8 +123,17 @@ do
 done
 
 
+echo
+echo "Command to run for the top-left touchpad corner (e.g. the share icon)."
+echo "Leave blank to keep the default (launches the calculator)."
+read -p 'Top-left command: ' topleft_cmd
+
 echo "Add asus touchpad service in /etc/systemd/system/"
-cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key envsubst '$LAYOUT $PERCENTAGE_KEY' > /etc/systemd/system/asus_touchpad_numpad.service
+cat asus_touchpad.service | LAYOUT=$model PERCENTAGE_KEY=$percentage_key TOPLEFT_CMD="$topleft_cmd" envsubst '$LAYOUT $PERCENTAGE_KEY $TOPLEFT_CMD' > /etc/systemd/system/asus_touchpad_numpad.service
+
+if [ -z "$topleft_cmd" ]; then
+    sed -i '/^Environment=ASUS_TOUCHPAD_TOPLEFT_CMD=/d' /etc/systemd/system/asus_touchpad_numpad.service
+fi
 
 mkdir -p /usr/share/asus_touchpad_numpad-driver/numpad_layouts
 mkdir -p /var/log/asus_touchpad_numpad-driver
