@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import signal
 import importlib
 import logging
 import math
@@ -97,9 +98,12 @@ while tries > 0:
 
     sleep(model_layout.try_sleep)
 
+# IMPLEMENTED: Hardcode I2C bus to 1 for this hardware revision
+device_id = "1"
+
 # Start monitoring the touchpad
 
-fd_t = open('/dev/input/event' + str(touchpad), 'rb')
+fd_t = open('/dev/input/event17', 'rb')
 fcntl(fd_t, F_SETFL, os.O_NONBLOCK)
 d_t = Device(fd_t)
 
@@ -192,6 +196,16 @@ def deactivate_numlock():
     d_t.ungrab()
     subprocess.call(numpad_cmd, shell=True)
 
+def cleanup_and_exit(signum=None, frame=None):
+    log.info("Cleaning up and turning off numpad...")
+    try:
+        deactivate_numlock()
+    except Exception as e:
+        log.error("Error during deactivation: %s", e)
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, cleanup_and_exit)
+signal.signal(signal.SIGTERM, cleanup_and_exit)
 
 def launch_calculator():
     try:
