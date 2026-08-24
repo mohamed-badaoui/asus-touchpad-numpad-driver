@@ -98,15 +98,15 @@ while tries > 0:
 
     sleep(model_layout.try_sleep)
 
-# IMPLEMENTED: Hardcode I2C bus to 1 for this hardware revision
-device_id = "1"
-
 # Start monitoring the touchpad
 
-fd_t = open('/dev/input/event17', 'rb')
+if touchpad is None:
+    log.error("Touchpad event device not found")
+    sys.exit(1)
+
+fd_t = open('/dev/input/event' + str(touchpad), 'rb')
 fcntl(fd_t, F_SETFL, os.O_NONBLOCK)
 d_t = Device(fd_t)
-
 
 # Retrieve touchpad dimensions #
 
