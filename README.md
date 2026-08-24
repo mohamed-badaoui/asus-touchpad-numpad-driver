@@ -2,10 +2,10 @@
 
 | Without % = symbols             |  With % = symbols       |  With % = symbols (but incompatible with the non-universal version) |
 |:-------------------------:|:-------------------------:|:-------------------------:|
-| Model/Layout = ux433fa          | Model/Layout = m433ia   | Model/Layout = ux581l |
+| Model/Layout = ux433fa          | Model/Layout = m433ia   | Model/Layout = ux581l/ux582zm |
 | ![without % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-ZenBook-UX433FA.jpg)  |  ![with % = symbols](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-VivoBook-M433IA.jpg) | ![model ux581](https://github.com/mohamed-badaoui/ux433-touchpad-numpad/blob/main/images/Asus-ZenBook-UX581l.jpg) |
 
-This is a python service which enables switching between numpad and touchpad for the Asus UX433. It may work for other models. When running the script, use as an argument one of the strings `ux433fa` or `m433ia` or `ux581l` to select the layout that fits your touchpad. You can inspect the different layouts [here](https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver/tree/main/numpad_layouts).
+This is a python service which enables switching between numpad and touchpad for the Asus UX433. It may work for other models. When running the script, use as an argument one of the strings `ux433fa` or `m433ia` or `ux581l` or `ux582zm` to select the layout that fits your touchpad. You can inspect the different layouts [here](https://github.com/mohamed-badaoui/asus-touchpad-numpad-driver/tree/main/numpad_layouts).
 
 This python driver has been tested and works fine for these asus versions at the moment:
 - D413IA (with % and = symbols)
@@ -40,6 +40,7 @@ This python driver has been tested and works fine for these asus versions at the
 - UM325UA (with % and = symbols)
 - X412DA (without extra symbols)
 - UX581L (with % and = symbols)
+- UX582ZM (with % and = symbols)
 - Zephyrus S GX701 (with % and = symbols)
 - UX3405CA (with % and = symbols)
 - UM5302L / Zenbook S 13 OLED (with % and = symbols, top-left is a "share" icon, see below)
