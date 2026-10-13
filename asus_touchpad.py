@@ -103,7 +103,12 @@ device_id = "1"
 
 # Start monitoring the touchpad
 
-fd_t = open('/dev/input/event17', 'rb')
+import re
+with open('/proc/bus/input/devices', 'r') as f:
+    dev_data = f.read()
+match = re.search(r'Name="ASUE140C:00 04F3:3145 Touchpad".*?Handlers=.*?(event\d+)', dev_data, re.DOTALL)
+event_path = f"/dev/input/{match.group(1)}" if match else "/dev/input/event5"
+fd_t = open(event_path, 'rb')
 fcntl(fd_t, F_SETFL, os.O_NONBLOCK)
 d_t = Device(fd_t)
 
