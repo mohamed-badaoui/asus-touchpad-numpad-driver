@@ -72,6 +72,10 @@ do
             model=m433ia
             break
             ;;
+        "tm420ia")
+            model=tm420ia
+            break
+            ;;
         "ux433fa")
             model=ux433fa
             break
